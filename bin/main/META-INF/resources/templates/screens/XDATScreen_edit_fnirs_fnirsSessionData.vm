@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+$page.setTitle("XDAT")
+$page.setLinkColor($ui.alink)
+$page.setVlinkColor($ui.vlink)
+#set($months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"])
+#set($days = [ 1..31 ])
+#set($years = [ $!turbineUtils.getYear()..1900])
+#if ($data.message)
+<font color="red" size="3">$data.message</font>
+#end
+<p>
+<form ID="form1" name="form1" method="post" action="$link.setAction("ModifySubjectAssessorData")">
+<input type="hidden" name="project" value="$!{project}" >
+#if($vr)
+	<font color="red">Invalid parameters:<BR>$vr.toHTML()</font>
+<HR>
+#end
+
+<TABLE width="100%">
+	<TR>
+		<TD>
+			<table width="100%">
+				<TR>
+					<TD align="left" valign="middle">
+						<DIV class="edit_title">fnirsSession Details</DIV>
+					</TD>
+				</TR>
+			</TABLE>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+			<TABLE width="100%">
+				<TR>
+					<TD valign="top">
+						<TABLE>
+							<TR><TD colspan='2'>
+								#parse("/screens/xnat_edit_subjectAssessorData.vm")
+							</TD></TR>
+							<tr>
+								<TD colspan="2">#parse("/screens/EditProjectSpecificFields.vm")</TD>
+							</tr>
+							<TR><TD>UID</TD><TD>#xdatStringBox("fnirs:fnirsSessionData/UID" $item "" $vr)</TD></TR>
+							<TR><TD>study_id</TD><TD>#xdatStringBox("fnirs:fnirsSessionData/study_id" $item "" $vr)</TD></TR>
+							<TR><TD>task</TD><TD>#xdatTextBox("fnirs:fnirsSessionData/task" $item "" $vr)</TD></TR>
+							<TR><TD>age</TD><TD>#xdatTextBox("fnirs:fnirsSessionData/age" $item "" $vr)</TD></TR>
+							<TR><TD>date</TD><TD>#xdatDateBox("fnirs:fnirsSessionData/date" $item $vr $years)</TD></TR>
+							<TR><TD>time</TD><TD>#xdatTextBox("fnirs:fnirsSessionData/time" $item "" $vr)</TD></TR>
+							<TR><TD>note</TD><TD>#xdatStringBox("fnirs:fnirsSessionData/note" $item "" $vr)</TD></TR>
+							<TR><TD>acquisition_site</TD><TD>#xdatStringBox("fnirs:fnirsSessionData/acquisition_site" $item "" $vr)</TD></TR>
+							<TR><TD>visit_id</TD><TD>#xdatStringBox("fnirs:fnirsSessionData/visit_id" $item "" $vr)</TD></TR>
+							<TR><TD>visit</TD><TD>#xdatStringBox("fnirs:fnirsSessionData/visit" $item "" $vr)</TD></TR>
+						</TABLE>
+					</TD>
+				</TR>
+			</TABLE>
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+<!-- END fnirs:fnirsSessionData -->
+		</TD>
+	</TR>
+	<TR>
+		<TD>
+		#xdatEditProps($item $edit_screen)
+		<TR><TD COLSPAN=2 ALIGN=left><input type="button" ONCLICK="validateForm();"  name="eventSubmit_doInsert" value="Submit"/></TD></TR>
+		</TD>
+	</TR>
+</TABLE>
+</form>
+
+<script type="text/javascript">
+function validateForm()
+{
+   ## //INSERT CUSTOM CONTENT HERE
+	## let scanDataFiles = document.getElementById("scanData").files
+	## let scanName = scanDataFiles[0].name
+	## let funcDataFiles = document.getElementById("additionalInfo").files
+	## let experimentName = document.getElementById("fnirs:fnirsSessionData/label").value
+	## let project = document.getElementsByName("project").value
+	## let subject = document.getElementById("subject_id").value
+   ##
+	## // data.append('additionalInfo', funcDataFiles)
+	## function uploadScanData(scanFiles, scname, funcFiles, projectname, subjectname, expName) {
+	## 	let data = new FormData()
+	## 	let fetchURL = `REST/projects/${projectname}/subjects/${subjectname}/experiments/${expName}/scan/${scname}`
+	## 	data.append("scanData", scanFiles);
+	## 	data.append("extract", true)
+   ##
+	## 	fetch(fetchURL, {
+	## 		method: 'PUT',
+	## 		body: data
+	## 	})
+	## 	alert(`The file ${scanName} has been uploaded successfully.`);
+	## }
+	// uploadScanData(scanDataFiles, scanName, funcDataFiles, project, subject, experimentName)
+	validateSubjectAssessorForm();
+
+
+	return false;
+}
+</script>

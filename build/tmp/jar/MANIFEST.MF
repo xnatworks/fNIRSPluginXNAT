@@ -1,13 +1,13 @@
 Manifest-Version: 1.0
 Application-Name: fNIRS-PLUGIN
-Build-Date: Tue May 28 14:32:18 CDT 2024
+Implementation-CleanTag: false
+Implementation-Branch: main
+Build-Date: Sat Jul 12 17:04:45 EDT 2025
 Build-Number: Manual
 Implementation-Version: 1.1.4
-Implementation-Sha: 8a3ea93ab1
-Implementation-Sha-Full: 8a3ea93ab151cb6ce2461ad828d2cbdbdf2ef740
-Implementation-Commit: 0
-Implementation-LastTag: 8a3ea93
-Implementation-Branch: main
-Implementation-CleanTag: false
-Implementation-Dirty: true
+Implementation-Sha-Full: 63b0269942253871cfa5deb0ba7982103cdad2f8
+Implementation-Sha: 63b0269942
+Implementation-Dirty: false
+Implementation-Commit: 1
+Implementation-LastTag: 1.1.3
 
