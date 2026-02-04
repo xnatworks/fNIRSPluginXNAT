@@ -11,6 +11,7 @@
     <xs:element name="fnirsSession" type="fnirs:fnirsSessionData"/>
     <xs:element name="fnirsScan" type="fnirs:fnirsScanData"/>
     <xs:element name="fnirsPipelineAssessorData" type="fnirs:fnirsPipelineAssessorData"/>
+    <xs:element name="fNIRSQC" type="fnirs:fnirsqcData"/>
 
     <xs:complexType name="fnirsSessionData">
         <xs:annotation>
@@ -77,7 +78,48 @@
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
-
-
-
+    <xs:complexType name="fnirsqcData">
+        <xs:complexContent>
+            <xs:extension base="xnat:imageAssessorData">
+                <xs:sequence>
+                    <xs:element name="rater" type="xs:string" minOccurs="0"/>
+                    <xs:element name="scans" minOccurs="0">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="scan" type="xnat:qcScanData" maxOccurs="unbounded">
+                                    <xs:annotation>
+                                        <xs:appinfo>
+                                            <xdat:field>
+                                                <xdat:relation uniqueComposite="qc_scan_id_fk"/>
+                                            </xdat:field>
+                                        </xs:appinfo>
+                                    </xs:annotation>
+                                </xs:element>
+                            </xs:sequence>
+                            <xs:sequence>
+                                <xs:element name="lightFalloff" type="xs:string" minOccurs="0"/>
+                                <xs:element name="pulseSnr" type="xs:string" minOccurs="0"/>
+                                <xs:element name="pulsatility" type="xs:string" minOccurs="0"/>
+                                <xs:element name="mapQuality" type="xs:string" minOccurs="0"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="comments" minOccurs="0">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:maxLength value="1000"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <!-- Base MR Scan QC data. Should be applicable to all types of MR scans -->
+    <xs:complexType name="fnirsQcScanData">
+        <xs:complexContent>
+            <xs:extension base="xnat:qcScanData">
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 </xs:schema>

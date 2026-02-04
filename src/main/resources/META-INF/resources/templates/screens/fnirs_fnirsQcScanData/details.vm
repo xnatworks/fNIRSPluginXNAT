@@ -1,0 +1,17 @@
+<tr>
+	<th>Pass</th>
+	<td style="font-weight:bold;">
+		#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/pass").equals("1"))
+			<span style="color:green">Passed</span>
+		#elseif($!scan.getStringProperty("fnirs:fnirsQcScanData/pass").equals("0"))
+			<span style="color:red">Failed</span>
+		#else
+			<span style="color:gold">Unknown ($!scan.getStringProperty("fnirs:fnirsQcScanData/pass")</span>
+		#end
+	</td>
+</tr>
+
+
+#if( $!scan.getStringProperty("fnirs:fnirsQcScanData/comments") )
+	<tr><th>Additional QC Comments</th><td>$!scan.getStringProperty("fnirs:fnirsQcScanData/comments")</td></tr>
+#end

@@ -1,0 +1,57 @@
+<!-- BEGIN fnirs:fnirsQcScanData -->
+#set($yes_no_options = ["Yes", "No"])
+#set($session = $om.getImageSessionData())
+#set($imageScan_ID = $item.getStringProperty("fnirs:fnirsqcData/scans/scan[$scan_counter]/imageScan_ID"))
+#xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/imageScan_ID" $item $imageScan_ID)
+
+<div class="snapshot-row"></div>
+
+<script>
+    let qcImages = [];
+    XNAT.xhr.getJSON({
+        url: XNAT.url.restUrl('/data/experiments/$imageSession_ID/scans/$scanId/resources/QC/files'),
+        fail: function(e){ console.error(e) },
+        success: function(data){
+            qcImages=data.ResultSet.Result;
+            if (qcImages.length) {
+                qcImages.forEach(function(img){
+                    console.log(img, XNAT.url.rootUrl(img['URI']));
+                    $(document).find('.report-section.${scanId}').find('.snapshot-row').append(
+                        spawn('.snapshot-container',{
+                            style: {
+                                'background-image':'url(' + XNAT.url.rootUrl(img['URI']) + ')',
+                                'margin-right':'1rem'
+                            },
+                            onclick: function(){ XNAT.ui.dialog.open({
+                                title: img['Name'],
+                                width: 800,
+                                content: '<img src="' + XNAT.url.rootUrl(img['URI']) + '" />',
+                                maxBtn: true,
+                                buttons: [
+                                    { label: 'OK', isDefault: true, close: true }
+                                ]
+                            })}
+                        })
+                    );
+                });
+            } else {
+                $(document).find('.report-section .${scanId}').find('.snapshot-row').empty().append('No snapshots to view');
+            }
+        }
+    });
+</script>
+<tr>
+	<td>Pass QC?</td>
+	<td>
+		#qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" $item $vr)
+		#xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/xnat_qcScanData_id" $item "")
+	</td>
+</tr>
+<tr>
+	<td valign="top">QC Comments</td>
+	<td>#xdatTextArea("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/comments" $item "" $vr 3 30)</td>
+</tr>
+
+
+<!-- END fnirs:fnirsQcScanData -->
+
