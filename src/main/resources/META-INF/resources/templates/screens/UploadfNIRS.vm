@@ -181,7 +181,7 @@
 
             XNAT.ui.dialog.open({
                 title: 'Upload/Extraction Successful',
-                content: `<div class="success">Upload/Extraction of ${file.name} successful. Visit the <a target="_blank" href="/app/template/XDATScreen_prearchives.vm">prearchive</a> to review.</div>`,
+                content: `<div class="success">Upload/Extraction of ${file.name} successful. Visit the <a target="_blank" href="$content.getURI("/app/template/XDATScreen_prearchives.vm")">prearchive</a> to review.</div>`,
                 buttons: [
                     {
                         label: 'OK',
