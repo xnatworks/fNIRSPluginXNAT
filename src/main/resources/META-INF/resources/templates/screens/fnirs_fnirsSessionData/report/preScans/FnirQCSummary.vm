@@ -1,0 +1,57 @@
+#set($fnirsQcAssessors =$!om.getAssessors("fnirs:fnirsqcData"))
+
+#if ($fnirsQcAssessors.size()>0)
+<script>
+    const divs = document.getElementsByName("custom-pre-scans");
+    if (divs[0]) {
+      divs[0].classList.remove('hidden');
+    }
+</script>
+ 	#set($scanCounter=8900)
+ 	<A name="LINK${scanCounter}" HREF="#LINK${scanCounter}" onClick=" return blocking($scanCounter);">
+ 		<img ID="IMG$scanCounter" src="$content.getURI("images/plus.jpg")" border=0>
+ 		<font face="$ui.sansSerifFonts" size="4" style="line-height:18px;"><b>FNIRS QC Status</b></font>
+ 	</a>
+	<div ID="span$!scanCounter" style="position:relative; display:none;">
+		<br>
+		<table BORDER=1 STYLE="	border-collapse: collapse;">
+			<tr>
+				<td>
+					<table>
+						<tr>
+							<th> </th>
+							<th>Date </th>
+							<th>Rater </th>
+							<th>Comments </th>
+						</tr>
+
+ #set($numberOfQc = $fnirsQcAssessors.size())
+ #set($last = ${numberOfQc} - 1)
+ #set($latestFnirsQCAssessor = $fnirsQcAssessors.get($last))
+ #set ( $qcID = $!latestFnirsQCAssessor.getProperty("ID"))
+ #set ( $qcField = "${latestFnirsQCAssessor.getXSIType()}.ID")
+ 							<tr>
+ 								<th align="left">$!latestFnirsQCAssessor.getHeader()</th>
+ 								<td>
+ 									#if($latestFnirsQCAssessor.canRead($user))
+ 										#set ( $qcUrl = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$!latestFnirsQCAssessor.getXSIType()).addPathInfo('search_field',$qcField).addPathInfo('search_value',$qcID).addPathInfo('popup',$popup).addPathInfo('project',$project)" )
+ 										<a href="$qcUrl">
+ 										  #formatDate($!latestFnirsQCAssessor.getProperty("date"))
+ 										</a>
+ 									#else
+ 										Unknown
+ 									#end
+ 								</td>
+ 								<td>
+ 									$!latestFnirsQCAssessor.getStringProperty("rater")
+ 								</td>
+ 								<td>
+ 								    $!latestFnirsQCAssessor.getProperty("comments")
+ 								</td>
+ 							</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+#end

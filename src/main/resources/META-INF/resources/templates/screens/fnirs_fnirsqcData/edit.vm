@@ -19,12 +19,12 @@
         #end
     #end
     <select name="$name">
-        <option>Select A Rating</option>
-        <option value="1" #if($qcItem.getStringProperty($name) == "1")) selected #end>1</option>
-        <option value="2" #if($qcItem.getStringProperty($name) == "2")) selected #end>2</option>
-        <option value="3" #if($qcItem.getStringProperty($name) == "3")) selected #end>3</option>
-        <option value="4" #if($qcItem.getStringProperty($name) == "4")) selected #end>4</option>
-        <option value="5" #if($qcItem.getStringProperty($name) == "5")) selected #end>5</option>
+        <option value="0" #if($qcItem.getStringProperty($name) == "0") selected #end>Select A Rating</option>
+        <option value="1" #if($qcItem.getStringProperty($name) == "1") selected #end>1</option>
+        <option value="2" #if($qcItem.getStringProperty($name) == "2") selected #end>2</option>
+        <option value="3" #if($qcItem.getStringProperty($name) == "3") selected #end>3</option>
+        <option value="4" #if($qcItem.getStringProperty($name) == "4") selected #end>4</option>
+        <option value="5" #if($qcItem.getStringProperty($name) == "5") selected #end>5</option>
     </select>
 #end
 

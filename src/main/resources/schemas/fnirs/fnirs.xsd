@@ -96,12 +96,6 @@
                                     </xs:annotation>
                                 </xs:element>
                             </xs:sequence>
-                            <xs:sequence>
-                                <xs:element name="lightFalloff" type="xs:string" minOccurs="0"/>
-                                <xs:element name="pulseSnr" type="xs:string" minOccurs="0"/>
-                                <xs:element name="pulsatility" type="xs:string" minOccurs="0"/>
-                                <xs:element name="mapQuality" type="xs:string" minOccurs="0"/>
-                            </xs:sequence>
                         </xs:complexType>
                     </xs:element>
                     <xs:element name="comments" minOccurs="0">
@@ -119,6 +113,68 @@
     <xs:complexType name="fnirsQcScanData">
         <xs:complexContent>
             <xs:extension base="xnat:qcScanData">
+                <xs:sequence>
+                    <xs:element name="lightFalloff" type="xs:string" minOccurs="0">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Values:
+                            0: Select a Rating
+                            1 - 5
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:integer">
+                            <xs:minInclusive value="0"/>
+                            <xs:maxInclusive value="5"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="pulseSnr" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Values:
+                                0: Select a Rating
+                                1 - 5
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:integer">
+                                <xs:minInclusive value="0"/>
+                                <xs:maxInclusive value="5"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="pulsatility" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Values:
+                                0: Select a Rating
+                                1 - 5
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:integer">
+                                <xs:minInclusive value="0"/>
+                                <xs:maxInclusive value="5"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                    <xs:element name="mapQuality" type="xs:string" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>
+                                Values:
+                                0: Select a Rating
+                                1 - 5
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:integer">
+                                <xs:minInclusive value="0"/>
+                                <xs:maxInclusive value="5"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:element>
+                </xs:sequence>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

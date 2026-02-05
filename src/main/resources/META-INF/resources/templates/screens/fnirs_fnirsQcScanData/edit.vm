@@ -40,6 +40,13 @@
         </td>
     </tr>
     <tr>
+        <td>Pass QC?</td>
+        <td>
+                #qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" $item $vr)
+                #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/xnat_qcScanData_id" $item "")
+        </td>
+    </tr>
+    <tr>
         <td valign="top">QC Comments</td>
         <td>#xdatTextArea("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/comments" $item "" $vr 3 30)</td>
     </tr>
