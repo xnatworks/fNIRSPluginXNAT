@@ -26,49 +26,8 @@
 
 <h2>Overall QC for $!mr.getIdentifier($project,false)</h2>
 <table class="qcSessionTable">
-	<tr>
-		<th>Pass</th>
-		<td style="font-weight:bold;">
-			#if ($!item.getStringProperty("fnirs:fnirsqcData/pass").equals("1"))
-				<span style="color:green">Passed</span>
-			#elseif($!item.getStringProperty("fnirs:fnirsqcData/pass").equals("0"))
-				<span style="color:red">Failed</span>
-			#else
-				<span style="color:gold">
-					Unknown 
-					#if ($!item.getStringProperty("fnirs:fnirsqcData/pass"))
-						($!item.getStringProperty("fnirs:fnirsqcData/pass"))
-					#end
-				</span>
-			#end
-		</td>
-	</tr>
-	<tr>
-		<th>Payable</th>
-		<td>
-			#qcYesNo("fnirs:fnirsqcData/payable" $item)
-		</td>
-	</tr>
-	#if( $!item.getStringProperty("fnirs:fnirsqcData/rescan") )
-		<tr><th>Rescan</th>
-			<td>
-				#qcYesNo("fnirs:fnirsqcData/rescan" $item)
-			</td>
-		</tr>
-	#end
 	#if( $item.getProperty("fnirs:fnirsqcData/rater") )
 		<tr><th>Rater</th><td>$!item.getStringProperty("fnirs:fnirsqcData/rater")</td></tr>
-	#end
-	#if( $item.getProperty("fnirs:fnirsqcData/incidentalFindings") )
-		<tr>
-			<th>Incidental Findings</th>
-			<td>
-				$!item.getStringProperty("fnirs:fnirsqcData/incidentalFindings")
-			</td>
-		</tr>
-	#end
-	#if( $item.getProperty("fnirs:fnirsqcData/stereotacticMarker") )
-		<tr><th>Stereotactic Marker</th><td>$!item.getStringProperty("fnirs:fnirsqcData/stereotacticMarker")</td></tr>
 	#end
 	#if( $item.getProperty("fnirs:fnirsqcData/comments") )
 		<tr><th>Comments</th><td>$!item.getStringProperty("fnirs:fnirsqcData/comments")</td></tr>
@@ -81,15 +40,7 @@
 	<table class="qcScanTable">
 		#foreach($scan in $scans)
 			#set($scanId=$!scan.getStringProperty("xnat:qcScanData/imageScan_ID"))
-			#set($mrScan=$mr.getScanById($!scanId))
 			<tr>
-				<td>
-					<div id="snapshot-$!scan.getStringProperty("xnat:qcScanData/imageScan_ID")" class="snapshot-container"></div>
-					<script>
-						var url = XNAT.url.restUrl('/xapi/experiments/${mr_id}/scan/$!{scanId}/snapshot')
-						jq(document).find('#snapshot-${scanId}').css('background-image','url('+url+')');
-					</script>
-				</td>
 				<td>
 					<h3>Scan $!scanId</h3>
 					<table>

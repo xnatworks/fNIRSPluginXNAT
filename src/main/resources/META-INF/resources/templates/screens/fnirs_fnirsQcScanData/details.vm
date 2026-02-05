@@ -10,6 +10,26 @@
 		#end
 	</td>
 </tr>
+<tr>
+    <th>Light Fall Off</th>
+    <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/lightFalloff")</td>
+</tr>
+<tr>
+    <th>Pulse SNR</th>
+    <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/pulseSnr")</td>
+</tr>
+<tr>
+    <th>Pulsatility</th>
+    <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/pulsatility")</td>
+</tr>
+<tr>
+    <th>Motion</th>
+    <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/motion")</td>
+</tr>
+<tr>
+    <th>Map Quality</th>
+    <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/mapQuality")</td>
+</tr>
 
 
 #if( $!scan.getStringProperty("fnirs:fnirsQcScanData/comments") )
