@@ -109,6 +109,8 @@ public class XDATScreen_edit_fnirs_fnirsqcData extends EditImageAssessorScreen {
                 if(scan==null){
                     if (FnirsFnirsscandata.SCHEMA_ELEMENT_NAME.equals(imageScan.getXSIType())) {
                         scan = new FnirsFnirsqcscandata(user);
+                    } else {
+                        scan = new XnatOtherqcscandata(user);
                     }
                     scan.setImagescanId(imageScan.getId());
                     qcAccessor.setScans_scan(scan);
