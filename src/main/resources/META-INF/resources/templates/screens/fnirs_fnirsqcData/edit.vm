@@ -49,10 +49,12 @@
         background-color: #888;
         background-position: center;
         background-size: contain;
+        border-radius: 10px;
         display: inline-block;
         height: 200px;
         width: 200px;
     }
+    .snapshot-row { background: #f0f0f0; border: 1px solid #ccc; margin: 1rem 0; padding: 0.25rem; }
     .xnat-dialog-content img { max-width: 100%; }
 </style>
 
@@ -150,41 +152,7 @@
 	<tr>
 		<td>
 <!-- BEGIN fnirs:fnirsqcData -->
-            <script>
-                XNAT.app.showFnirsQcImages = function(sessionId,scanId){
-                    let qcImages = [];
-                    XNAT.xhr.getJSON({
-                        url: XNAT.url.restUrl('/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/files'),
-                        fail: function(e){ console.error(e) },
-                        success: function(data){
-                            qcImages=data.ResultSet.Result;
-                            if (qcImages.length) {
-                                qcImages.forEach(function(img){
-                                    $(document).find('.report-section.'+scanId).find('.snapshot-row').append(
-                                        spawn('.snapshot-container',{
-                                            style: {
-                                                'background-image':'url(' + XNAT.url.rootUrl(img['URI']) + ')',
-                                                'margin-right':'1rem'
-                                            },
-                                            onclick: function(){ XNAT.ui.dialog.open({
-                                                title: img['Name'],
-                                                width: 800,
-                                                content: '<img src="' + XNAT.url.rootUrl(img['URI']) + '" />',
-                                                maxBtn: true,
-                                                buttons: [
-                                                    { label: 'OK', isDefault: true, close: true }
-                                                ]
-                                            })}
-                                        })
-                                    );
-                                });
-                            } else {
-                                $(document).find('.report-section .'+scanId).find('.snapshot-row').empty().append('No snapshots to view');
-                            }
-                        }
-                    });
-                };
-            </script>
+            <script type="application/javascript" src="$content.getURI("/scripts/xnat/plugin/fnirs/fnirs-qc.js")"></script>
 			<h2>Scans</h2>
 <!-- BEGIN fnirs:fnirsqcData/scans/scan -->
             #set($scans = $item.getChildItems("fnirs:fnirsqcData/scans/scan"))

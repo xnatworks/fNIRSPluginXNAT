@@ -78,6 +78,7 @@
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
+
     <xs:complexType name="fnirsqcData">
         <xs:complexContent>
             <xs:extension base="xnat:imageAssessorData">
@@ -90,7 +91,7 @@
                                     <xs:annotation>
                                         <xs:appinfo>
                                             <xdat:field>
-                                                <xdat:relation uniqueComposite="qc_scan_id_fk"/>
+                                                <xdat:relation uniqueComposite="qc_scan_id_fk" relationType="single"/>
                                             </xdat:field>
                                         </xs:appinfo>
                                     </xs:annotation>
@@ -109,7 +110,7 @@
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
-    <!-- Base MR Scan QC data. Should be applicable to all types of MR scans -->
+    <!-- Extension of base for fNIRS Scan QC data. -->
     <xs:complexType name="fnirsQcScanData">
         <xs:complexContent>
             <xs:extension base="xnat:qcScanData">

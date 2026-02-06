@@ -21,7 +21,17 @@
 	.qcScanTable td {
 		vertical-align:top;
 	}
-
+	.snapshot-container {
+        background-color: #888;
+        background-position: center;
+        background-size: contain;
+        border-radius: 10px;
+        display: inline-block;
+        height: 200px;
+        width: 200px;
+    }
+    .snapshot-row { background: #f0f0f0; border: 1px solid #ccc; margin: 1rem 0; padding: 0.25rem; }
+    .xnat-dialog-content img { max-width: 100%; }
 </style>
 
 <h2>Overall QC for $!mr.getIdentifier($project,false)</h2>
@@ -33,7 +43,9 @@
 		<tr><th>Comments</th><td>$!item.getStringProperty("fnirs:fnirsqcData/comments")</td></tr>
 	#end
 </table>
+<script type="application/javascript" src="$content.getURI("/scripts/xnat/plugin/fnirs/fnirs-qc.js")"></script>
 
+#set($imageSession_ID = $item.getStringProperty("fnirs:fnirsqcData/imageSession_ID"))
 #set ($scans = $om.getScans_scan())
 #if ($scans && $scans.size() > 0)
 	<h2>Scans</h2>
@@ -42,10 +54,17 @@
 			#set($scanId=$!scan.getStringProperty("xnat:qcScanData/imageScan_ID"))
 			<tr>
 				<td>
-					<h3>Scan $!scanId</h3>
-					<table>
-						#parse($turbineUtils.getTemplateName("details",$scan.getXSIType(),$project))
-					</table>
+				    <div class="report-section $!scanId">
+                        <h3>Scan $!scanId</h3>
+                        <div class="snapshot-row"></div>
+                        <script>
+                            XNAT.app.showFnirsQcImages('${imageSession_ID}','${scanId}');
+                        </script>
+
+                        <table>
+                            #parse($turbineUtils.getTemplateName("details",$scan.getXSIType(),$project))
+                        </table>
+                    </div>
 				</td>
 			</tr>
 		#end

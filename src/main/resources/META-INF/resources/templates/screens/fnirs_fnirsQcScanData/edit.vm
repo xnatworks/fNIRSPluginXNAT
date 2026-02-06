@@ -8,7 +8,7 @@
 <script>
     XNAT.app.showFnirsQcImages('${imageSession_ID}','${imageScan_ID}');
 </script>
-<table>
+<table class="assessment">
     <tr>
         <th>Light Fall Off</th>
         <td>
@@ -40,14 +40,14 @@
         </td>
     </tr>
     <tr>
-        <td>Pass QC?</td>
+        <th>Pass QC?</th>
         <td>
-                #qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" $item $vr)
-                #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/xnat_qcScanData_id" $item "")
+            #qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" $item $vr)
+            #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/xnat_qcScanData_id" $item "")
         </td>
     </tr>
     <tr>
-        <td valign="top">QC Comments</td>
+        <th valign="top">QC Comments</th>
         <td>#xdatTextArea("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/comments" $item "" $vr 3 30)</td>
     </tr>
 </table>
