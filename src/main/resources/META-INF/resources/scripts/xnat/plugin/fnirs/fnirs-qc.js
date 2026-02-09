@@ -19,6 +19,7 @@ var XNAT = getObject(XNAT || {});
 }(function() {
 
     XNAT.app.showFnirsQcImages = function(sessionId,scanId){
+        let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc"];
         let qcImages = [];
         XNAT.xhr.getJSON({
             url: XNAT.url.restUrl('/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/files'),
@@ -26,8 +27,9 @@ var XNAT = getObject(XNAT || {});
             success: function(data){
                 qcImages=data.ResultSet.Result;
                 if (qcImages.length > 0) {
-                    qcImages.forEach(function(img){
-                        if (img['Name'].indexOf('.png') >= 0) {
+                    qcImageTypes.forEach(function(type){
+                        let img = qcImages.filter(function(file){ return file['Name'].indexOf(type) > 0 && file['Name'].indexOf('.png') > 0})[0];
+                        if (img) {
                             $(document).find('.report-section.'+scanId + ' .snapshot-row').append(
                                 spawn('.snapshot-container',{
                                     style: {
