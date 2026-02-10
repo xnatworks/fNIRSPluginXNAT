@@ -127,7 +127,7 @@
 		<DisplayFieldElement name="Field1" schema-element="fnirs:fnirsqcData/pass"/>
 		<Content type="sql">CASE @Field1 WHEN '1' THEN 'Pass' WHEN '0' THEN 'Fail' WHEN '2' THEN 'Good' WHEN '3' THEN 'Fair' WHEN '4' THEN 'Unusable' ELSE @Field1 END</Content>
 	</DisplayField>
-	<DisplayVersion versionName="listing" default-order-by="DATE" default-sort-order="DESC" brief-description="NeurodotQC" dark-color="9999CC" light-color="CCCCFF">
+	<DisplayVersion versionName="listing" default-order-by="DATE" default-sort-order="DESC" brief-description="fNIRS QC" dark-color="9999CC" light-color="CCCCFF">
 		<DisplayFieldRef id="RPT"/>
 		<DisplayFieldRef id="PROJECT"/>
 		<DisplayFieldRef id="LABEL"/>
@@ -135,26 +135,26 @@
 		<DisplayFieldRef id="RATER"/>
 		<DisplayFieldRef id="COMMENTS"/>
 	</DisplayVersion>
-	<DisplayVersion versionName="listing_csv" default-order-by="DATE" default-sort-order="DESC" brief-description="NeurodotQC" dark-color="9999CC" light-color="CCCCFF">
+	<DisplayVersion versionName="listing_csv" default-order-by="DATE" default-sort-order="DESC" brief-description="fNIRS QC" dark-color="9999CC" light-color="CCCCFF">
 		<DisplayFieldRef id="PROJECT"/>
 		<DisplayFieldRef id="LABEL"/>
 		<DisplayFieldRef id="DATE"/>
 		<DisplayFieldRef id="RATER"/>
 		<DisplayFieldRef id="COMMENTS"/>
 	</DisplayVersion>
-	<DisplayVersion versionName="full" default-order-by="DATE" default-sort-order="DESC" brief-description="NeurodotQC" dark-color="9999CC" light-color="CCCCFF">
+	<DisplayVersion versionName="full" default-order-by="DATE" default-sort-order="DESC" brief-description="fNIRS QC" dark-color="9999CC" light-color="CCCCFF">
 		<DisplayFieldRef id="EXPT_ID"/>
 		<DisplayFieldRef id="DATE"/>
 		<DisplayFieldRef id="RATER"/>
 		<DisplayFieldRef id="COMMENTS"/>
 	</DisplayVersion>
-	<DisplayVersion versionName="detailed" default-order-by="DATE" default-sort-order="DESC" brief-description="NeurodotQC" dark-color="9999CC" light-color="CCCCFF">
+	<DisplayVersion versionName="detailed" default-order-by="DATE" default-sort-order="DESC" brief-description="fNIRS QC" dark-color="9999CC" light-color="CCCCFF">
 		<DisplayFieldRef id="EXPT_ID"/>
 		<DisplayFieldRef id="DATE"/>
 		<DisplayFieldRef id="RATER"/>
 		<DisplayFieldRef id="COMMENTS"/>
 	</DisplayVersion>
-	<DisplayVersion versionName="project_bundle" default-order-by="DATE" default-sort-order="DESC" brief-description="NeurodotQC" dark-color="9999CC" light-color="CCCCFF">
+	<DisplayVersion versionName="project_bundle" default-order-by="DATE" default-sort-order="DESC" brief-description="fNIRS QC" dark-color="9999CC" light-color="CCCCFF">
 		<DisplayFieldRef id="OXI_NEURODOTQCDATA_PROJECT_IDENTIFIER"/>
 		<DisplayFieldRef id="DATE"/>
 		<DisplayFieldRef id="RATER"/>
