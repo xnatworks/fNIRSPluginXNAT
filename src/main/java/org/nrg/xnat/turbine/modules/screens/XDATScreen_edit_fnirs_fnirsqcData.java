@@ -102,7 +102,7 @@ public class XDATScreen_edit_fnirs_fnirsqcData extends EditImageAssessorScreen {
         }
 
         List<XnatImagescandata> imageScans = imageSession.getScans_scan();
-        imageScans.sort(Comparator.comparing(XnatImagescandata::getId));
+//        imageScans.sort(Comparator.comparing(XnatImagescandata::getId));
         for (XnatImagescandataI imageScan: imageScans){
             if(types.size()==0 || types.contains(imageScan.getXSIType())){
                 XnatQcscandata scan = (XnatQcscandata)getQCScan(qcAccessor,imageScan.getId());
