@@ -6,6 +6,7 @@ import org.nrg.framework.annotations.XnatPlugin;
 import org.nrg.xdat.om.FnirsFnirspipelineassessordata;
 import org.nrg.xdat.om.FnirsFnirssessiondata;
 import org.nrg.xdat.om.FnirsFnirsscandata;
+import org.nrg.xdat.om.FnirsFnirsqcdata;
 import org.nrg.xnat.restlet.actions.importer.ImporterHandlerPackages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +26,13 @@ import org.springframework.context.annotation.ComponentScan;
                                          plural = "fNIRS Scans",
                                          code = "fNIRSScan"),
                           @XnatDataModel(value = FnirsFnirspipelineassessordata.SCHEMA_ELEMENT_NAME,
-                            singular = "Pipeline Run Assessment",
-                            plural = "Pipeline Run Assessments",
-                            code = "PRA"),
+                                         singular = "Pipeline Run Assessment",
+                                         plural = "Pipeline Run Assessments",
+                                         code = "PRA"),
+                          @XnatDataModel(value = FnirsFnirsqcdata.SCHEMA_ELEMENT_NAME,
+                                         singular = "fNIRS QC",
+                                         plural = "fNIRS QCs",
+                                         code = "fQC")
                           })
 @ComponentScan({"org.nrg.xnatx.plugins.fnirs.bli.helpers",
                 "org.nrg.xnatx.plugins.fnirs.bli.helpers.impl"

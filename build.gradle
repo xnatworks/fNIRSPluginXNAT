@@ -4,17 +4,17 @@
 plugins {
     id "java"
     id "org.nrg.xnat.build.xnat-data-builder" version "1.8.7"
+    id "maven-publish"
     id "io.freefair.lombok" version "6.0.0-m2"
     id "com.palantir.git-version" version "0.12.1"
 }
 
 group "org.nrg.xnatx.plugins"
-version "1.1.4"
+version "1.2.0"
 description "fNIRS Plugin for XNAT."
 
 repositories {
     mavenLocal()
-    maven { url "https://www.dcm4che.org/maven2" }
     maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-release" }
     maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot" }
     mavenCentral()
@@ -129,6 +129,56 @@ jar {
     from {
         (configurations.implementation - configurations.xnatProvided).collect {
             it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            versionMapping {
+                usage("java-api") {
+                    fromResolutionOf("runtimeClasspath")
+                }
+                usage("java-runtime") {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = "OXI FNIRS Plugin"
+                description = "Adds support for displaying and QCing FNIRS image data"
+                developers {
+                    developer {
+                        id = "Will_Horton"
+                        name = "Will Horton"
+                        email = "will@xnatworks.io"
+                    }
+                    developer {
+                        id = "James_Dickson"
+                        name = "James Dickson"
+                        email = "james@xnatworks.io"
+                    }
+                    developer {
+                        id = "Mohana_Ramaratnam"
+                        name = "Mohana Ramaratnam"
+                        email = "mohana@xnatworks.io"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/xnatworks/fNIRSPluginXNAT.git"
+                    developerConnection = "scm:git:ssh://github.com/xnatworks/fNIRSPluginXNAT.git"
+                    url = "https://github.com/xnatworks/fNIRSPluginXNAT"
+                }
+            }
+        }
+    }
+    repositories{
+        maven {
+            url "https://nrgxnat.jfrog.io/nrgxnat/libs-${project.version.endsWith("-SNAPSHOT") ? "snapshot" : "release"}"
+            // The value for name must match <id> in ~/.m2/settings.xml
+            name = "XNAT_Artifactory"
         }
     }
 }

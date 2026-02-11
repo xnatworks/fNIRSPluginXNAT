@@ -1,0 +1,36 @@
+<tr>
+	<th>Pass</th>
+	<td style="font-weight:bold;">
+		#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/pass").equals("1"))
+			<span style="color:green">Passed</span>
+		#elseif($!scan.getStringProperty("fnirs:fnirsQcScanData/pass").equals("0"))
+			<span style="color:red">Failed</span>
+		#else
+			<span style="color:gold">Unknown ($!scan.getStringProperty("fnirs:fnirsQcScanData/pass")</span>
+		#end
+	</td>
+</tr>
+<tr>
+    <th>Light Fall Off</th>
+    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/lightFalloff") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/lightFalloff") #end</td>
+</tr>
+<tr>
+    <th>Pulse SNR</th>
+    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/pulseSnr") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/pulseSnr") #end</td>
+</tr>
+<tr>
+    <th>Pulsatility</th>
+    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/pulsatility") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/pulsatility") #end</td>
+</tr>
+<tr>
+    <th>Motion</th>
+    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/motion") !="0") $!scan.getStringProperty("fnirs:fnirsQcScanData/motion") #end</td>
+</tr>
+<tr>
+    <th>Map Quality</th>
+    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/mapQuality") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/mapQuality")#end</td>
+</tr>
+<tr>
+    <th>Additional QC Comments</th>
+    <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/comments")</td>
+</tr>

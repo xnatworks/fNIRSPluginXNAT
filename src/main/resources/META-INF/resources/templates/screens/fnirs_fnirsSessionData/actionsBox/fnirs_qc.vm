@@ -1,0 +1,5 @@
+#if($data.getSession().getAttribute("userHelper").canEdit("fnirs:fnirsqcData/project", $om.getProject()))
+    <li class="yuimenuitem fnirs_qc $!li_class">
+        <a href="${link.setAction("XDATActionRouter").addPathInfo("xdataction","XDATScreen_edit_fnirs_fnirsqcData").addPathInfo("search_element","$element.getFullXMLName()").addPathInfo("search_field","$search_field").addPathInfo("search_value","$search_value").addPathInfo("popup",$dataPopup).addPathInfo("project","$!project")}" >Add fNIRS QC</a>
+    </li>
+#end
