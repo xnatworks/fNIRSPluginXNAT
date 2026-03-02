@@ -27,10 +27,6 @@
     <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/motion") !="0") $!scan.getStringProperty("fnirs:fnirsQcScanData/motion") #end</td>
 </tr>
 <tr>
-    <th>Map Quality</th>
-    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/mapQuality") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/mapQuality")#end</td>
-</tr>
-<tr>
     <th>Additional QC Comments</th>
     <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/comments")</td>
 </tr>

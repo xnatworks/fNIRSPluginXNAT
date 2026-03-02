@@ -34,12 +34,6 @@
         </td>
     </tr>
     <tr>
-        <th>Map Quality</th>
-        <td>
-            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/mapQuality" $item $vr)
-        </td>
-    </tr>
-    <tr>
         <th>Pass QC?</th>
         <td>
             #qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" $item $vr)
