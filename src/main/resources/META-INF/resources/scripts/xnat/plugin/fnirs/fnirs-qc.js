@@ -17,29 +17,41 @@ var XNAT = getObject(XNAT || {});
         return factory();
     }
 }(function() {
+    const x2js = new X2JS();
 
     XNAT.app.showFnirsQcImages = function(sessionId,scanId){
-        let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc"];
-        let qcImages = [];
-        XNAT.xhr.getJSON({
-            url: XNAT.url.restUrl('/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/files'),
+        let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc"],
+            scanUrl = '/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/';
+        $(document).find('.report-section.'+scanId + ' .snapshot-row').html('Loading QC images for '+scanId);
+        XNAT.xhr.get({
+            url: XNAT.url.restUrl(scanUrl),
+            async: true,
             fail: function(e){ console.error(e) },
             success: function(data){
-                qcImages=data.ResultSet.Result;
+                const imgContainer$ = $(document).find('.report-section.'+scanId + ' .snapshot-row');
+                let rawData = x2js.xml2json(data);
+                let qcImages=rawData.Catalog.entries.entry;
                 if (qcImages.length > 0) {
+                    console.log('Found images in '+scanId);
+                    imgContainer$.empty();
                     qcImageTypes.forEach(function(type){
-                        let img = qcImages.filter(function(file){ return file['Name'].indexOf(type) > 0 && file['Name'].indexOf('.png') > 0})[0];
-                        if (img) {
-                            $(document).find('.report-section.'+scanId + ' .snapshot-row').append(
+                        let imgs = qcImages.filter(function(file){ return file['_name'].indexOf(type) > 0 && file['_name'].indexOf('.png') > 0});
+                        if (imgs.length){
+                            // check for multiple possible matches and filter by last modification date
+                            let img = (imgs.length > 1) ?
+                                imgs.sort(function(a,b){ return (a['_modifiedTime'] > b['_modifiedTime']) ? -1 : 1 })[0] :
+                                imgs[0];
+                            console.log(img['_name']);
+                            imgContainer$.append(
                                 spawn('.snapshot-container',{
                                     style: {
-                                        'background-image':'url(' + XNAT.url.rootUrl(img['URI']) + ')',
+                                        'background-image':'url('+ XNAT.url.rootUrl(scanUrl + 'files/' + img['_URI']) + ')',
                                         'margin-right':'1rem'
                                     },
                                     onclick: function(){ XNAT.ui.dialog.open({
-                                        title: img['Name'],
+                                        title: img['_name'],
                                         width: 800,
-                                        content: '<img src="' + XNAT.url.rootUrl(img['URI']) + '" />',
+                                        content: '<img src="' + XNAT.url.rootUrl(scanUrl + 'files/' + img['_URI']) + '" />',
                                         maxBtn: true,
                                         maxxed: true,
                                         buttons: [
@@ -51,8 +63,7 @@ var XNAT = getObject(XNAT || {});
                         }
                     });
                 } else {
-                    let scanSection=$(document).find('.report-section.'+scanId);
-                    scanSection.find('.snapshot-row').empty().append('No snapshots to view');
+                    imgContainer$.empty().html('No snapshots to view');
                     scanSection.find('.assessment').hide();
                     scanSection.find('input').prop('disabled','disabled');
                     scanSection.find('select').prop('disabled','disabled');
