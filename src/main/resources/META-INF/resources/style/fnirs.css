@@ -8,6 +8,17 @@
     display: inline-block;
     height: 150px;
     width: 150px;
+    position: relative;
+}
+.snapshot.multiple:after {
+    background: #ffcc00;
+    border-radius: 50%;
+    content: attr(data-multiple);
+    color: #242424;
+    position: absolute; right: 10px; bottom: 10px;
+    padding: 5px;
+    text-align: center;
+    width: 1rem;
 }
 .snapshot:hover {
     outline: 2px solid #1a75bb;
@@ -25,5 +36,11 @@
 .panel-default.qcPanel .panel-heading { background: #f0f0f0; color: #000; }
 .panel-default.qcPanel .panel-body { padding: 10px; }
 .panel.qcPanel .panel-element { padding: 2px 0; }
-.panel.qcPanel .panel-element .element-label { text-align: left; padding-right: 6px; }
+.panel.qcPanel .panel-element .element-label { text-align: left; }
+.panel.qcPanel .panel-element .element-wrapper { padding-left: 6px; }
 .panel.qcPanel h4 { text-transform: uppercase; border-bottom: 1px solid #ccc; }
+
+/* hacks */
+tr.w10 {
+    display: table-row;
+}

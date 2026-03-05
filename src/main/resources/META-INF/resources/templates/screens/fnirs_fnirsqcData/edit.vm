@@ -23,7 +23,7 @@
 
 #macro (qcYesNoSelect $name $label $qcItem $vr)
 	<div class="panel-element #if($vr) #if($vr.getField($name)) invalid #end #end">
-	    <label class="element-label" for="name">$label</label>
+	    <label class="element-label" for="$name">$label</label>
 	    <div class="element-wrapper">
             <input type="radio" name="$name" value="0" #if($qcItem.getStringProperty($name) == "0")) checked #end />No
             <input type="radio" name="$name" value="1" #if($qcItem.getStringProperty($name) == "1")) checked #end />Yes
@@ -34,7 +34,7 @@
 
 #macro (qcCommentBox $name $qcItem $vr)
 	<div class="panel-element #if($vr) #if($vr.getField($name)) invalid #end #end">
-	    <label class="element-label" for="name">Scan Comments</label>
+	    <label class="element-label" for="$name">Scan Comments</label>
 	    <div class="element-wrapper">
             <textarea id="$name" name="$name" rows="6"></textarea>
 	    </div>
@@ -42,10 +42,6 @@
 	</div>
 #end
 
-
-#set($months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"])
-#set($days = [ 1..31 ])
-#set($years = [ $!turbineUtils.getYear()..1900])
 
 #if ($data.message)
 	<div class="alert">$data.message</div>
@@ -112,7 +108,15 @@
             </td>
         </tr>
         <tr><td>Label</td><td>#xdatStringBoxWClass("fnirs:fnirsqcData/label" $item "" $vr "required")</td></tr>
-        <tr><td>QC Date</td><td>#xdatDateBox("fnirs:fnirsqcData/date" $item $vr $years)</td></tr>
+        <tr><td>QC Date</td>
+            <td>
+                <span id="qc-datepicker" class="single us today" data-value="" data-validate="onblur" data-input-id="fnirs:fnirsqcData/date" data-input-name="fnirs:fnirsqcData/date">
+                <script type="text/javascript">
+                    jQuery('#qc-datepicker').data('value',XNAT.data.todaysDate.us);
+                    XNAT.app.datePicker.init(jQuery('#qc-datepicker'));
+                </script>
+            </td>
+        </tr>
         <tr><td>Rater</td><td>#xdatStringBox("fnirs:fnirsqcData/rater" $item "" $vr)</td></tr>
         <tr><td valign="top">Comments</td><td>#xdatTextArea("fnirs:fnirsqcData/comments" $item "" $vr 3 30)</td></tr>
     </table>

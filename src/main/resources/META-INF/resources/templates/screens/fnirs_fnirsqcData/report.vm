@@ -1,18 +1,16 @@
-#macro (qcYesNo $name $qcItem)
-	#if ($qcItem.getStringProperty($name) == "1")
-		Yes
-	#elseif ($qcItem.getStringProperty($name) == "0")
-		No
-	#else
-		$!qcItem.getStringProperty($name)
-	#end
-#end
-
 #parse($turbineUtils.getTemplateName("report","xnat:imageAssessorData",$project))
 
-<script type="text/javascript">
-	document.title = "fNIRS QC Assessment for $!mr.getIdentifier($project,false)";
-</script>
+#macro (showQcMeasurement $name $label $qcItem)
+    <div class="panel-element">
+        <label class="element-label" for="$name">$label</label>
+        <div class="element-wrapper">
+            #if ($!qcItem.getStringProperty($name))
+                $!qcItem.getStringProperty($name)
+            #end
+        </div>
+        <div class="clear"></div>
+    </div>
+#end
 
 <link rel="stylesheet" type="text/css" href="$content.getURI("/style/fnirs.css")" />
 
@@ -31,24 +29,17 @@
 #set ($scans = $om.getScans_scan())
 #if ($scans && $scans.size() > 0)
 	<h2>Scans</h2>
-	<table class="qcScanTable">
 		#foreach($scan in $scans)
 			#set($scanId=$!scan.getStringProperty("xnat:qcScanData/imageScan_ID"))
-			<tr>
-				<td>
-				    <div class="report-section $!scanId">
-                        <h3>Scan $!scanId</h3>
-                        <div class="snapshot-grid-container"></div>
-                        <script>
-                            XNAT.app.showFnirsQcImages('${imageSession_ID}','${scanId}');
-                        </script>
-
-                        <table>
-                            #parse($turbineUtils.getTemplateName("details",$scan.getXSIType(),$project))
-                        </table>
-                    </div>
-				</td>
-			</tr>
+			<div class="panel panel-default qcPanel $scanId">
+                <div class="panel-heading">
+                    <h3>$scanId</h3>
+                </div>
+                <div class="panel-body">
+                    #parse($turbineUtils.getTemplateName("details",$scan.getXSIType(),$project))
+                </div>
+            </div>
+            #set($scan_counter = $scan_counter + 1)
 		#end
 	</table>
 #end
