@@ -14,25 +14,7 @@
 	document.title = "fNIRS QC Assessment for $!mr.getIdentifier($project,false)";
 </script>
 
-<style>
-	.qcScanTable th, .qcSessionTable th {
-		text-align:left;
-	}
-	.qcScanTable td {
-		vertical-align:top;
-	}
-	.snapshot-container {
-        background-color: #888;
-        background-position: center;
-        background-size: contain;
-        border-radius: 10px;
-        display: inline-block;
-        height: 200px;
-        width: 200px;
-    }
-    .snapshot-row { background: #f0f0f0; border: 1px solid #ccc; margin: 1rem 0; padding: 0.25rem; }
-    .xnat-dialog-content img { max-width: 100%; }
-</style>
+<link rel="stylesheet" type="text/css" href="$content.getURI("/style/fnirs.css")" />
 
 <h2>Overall QC for $!mr.getIdentifier($project,false)</h2>
 <table class="qcSessionTable">
@@ -56,7 +38,7 @@
 				<td>
 				    <div class="report-section $!scanId">
                         <h3>Scan $!scanId</h3>
-                        <div class="snapshot-row"></div>
+                        <div class="snapshot-grid-container"></div>
                         <script>
                             XNAT.app.showFnirsQcImages('${imageSession_ID}','${scanId}');
                         </script>

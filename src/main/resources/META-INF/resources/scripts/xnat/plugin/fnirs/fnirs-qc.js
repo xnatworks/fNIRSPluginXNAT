@@ -20,30 +20,28 @@ var XNAT = getObject(XNAT || {});
     const x2js = new X2JS();
 
     XNAT.app.showFnirsQcImages = function(sessionId,scanId){
-        let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc"],
+        let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc","GLM_DM","thresholded_map","no_threshold_map"],
             scanUrl = '/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/';
-        $(document).find('.report-section.'+scanId + ' .snapshot-row').html('Loading QC images for '+scanId);
+        $(document).find('.panel.'+scanId + ' .snapshot-grid-container').html('Loading QC images for '+scanId);
         XNAT.xhr.get({
             url: XNAT.url.restUrl(scanUrl),
             async: true,
             fail: function(e){ console.error(e) },
             success: function(data){
-                const imgContainer$ = $(document).find('.report-section.'+scanId + ' .snapshot-row');
+                const imgContainer$ = $(document).find('.panel.'+scanId + ' .snapshot-grid-container');
                 let rawData = x2js.xml2json(data);
                 let qcImages=rawData.Catalog.entries.entry;
                 if (qcImages.length > 0) {
-                    console.log('Found images in '+scanId);
                     imgContainer$.empty();
                     qcImageTypes.forEach(function(type){
-                        let imgs = qcImages.filter(function(file){ return file['_name'].indexOf(type) > 0 && file['_name'].indexOf('.png') > 0});
+                        let imgs = qcImages.filter(function(file){ return file['_name'].indexOf(type) > 0 });
                         if (imgs.length){
                             // check for multiple possible matches and filter by last modification date
                             let img = (imgs.length > 1) ?
                                 imgs.sort(function(a,b){ return (a['_modifiedTime'] > b['_modifiedTime']) ? -1 : 1 })[0] :
                                 imgs[0];
-                            console.log(img['_name']);
                             imgContainer$.append(
-                                spawn('.snapshot-container',{
+                                spawn('.snapshot',{
                                     style: {
                                         'background-image':'url('+ XNAT.url.rootUrl(scanUrl + 'files/' + img['_URI']) + ')',
                                         'margin-right':'1rem'
@@ -63,10 +61,43 @@ var XNAT = getObject(XNAT || {});
                         }
                     });
                 } else {
-                    imgContainer$.empty().html('No snapshots to view');
-                    scanSection.find('.assessment').hide();
-                    scanSection.find('input').prop('disabled','disabled');
-                    scanSection.find('select').prop('disabled','disabled');
+                    imgContainer$.html('No snapshots to view');
+                    $(document).find('.panel.'+scanId+' .assessment').hide();
+                    $(document).find('.panel.'+scanId+' input').prop('disabled','disabled');
+                    $(document).find('.panel.'+scanId+' select').prop('disabled','disabled');
+                }
+            }
+        });
+    };
+    
+    XNAT.app.showFnirsQcMeasurements = function(sessionId,scanId){
+        let qcFileUrl = '/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/files/DQ_metrics.json';
+        XNAT.xhr.get({
+            url: XNAT.url.restUrl(qcFileUrl),
+            async: true,
+            fail: function(e){
+                if (e.status == 404) {
+                    $(document).find('.'+scanId + '.fnirs-measurements').html('No measurements to view');
+                } else { console.error(e); }
+            },
+            success: function(data){
+                const measurementContainer$ = $(document).find('.'+scanId + '.fnirs-measurements');
+                let measurementJson = JSON.parse(data);
+                if (Object.keys(measurementJson).length > 0) {
+                    for (let key in measurementJson){
+                        let val = measurementJson[key];
+                        if (!isNaN(val * 1)){
+                            // convert string to number to access JS number functions
+                            val = (val * 1).toPrecision(4);
+                            val = (val > 0.01) ? val : (val * 1).toExponential(3);
+                        }
+                        measurementContainer$.append(XNAT.ui.panel.element({
+                            label: escapeHTML(key),
+                            html: escapeHTML(val)
+                        }).element);
+                    }
+                } else {
+                    measurementContainer$.html('No measurements to view');
                 }
             }
         });

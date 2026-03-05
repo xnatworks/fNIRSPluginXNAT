@@ -1,0 +1,29 @@
+.snapshot {
+    background-color: #484848;
+    background-position: center;
+    background-size: contain;
+    border-radius: 4px;
+    border: 1px solid #fff;
+    cursor: pointer;
+    display: inline-block;
+    height: 150px;
+    width: 150px;
+}
+.snapshot:hover {
+    outline: 2px solid #1a75bb;
+    opacity: 0.8;
+}
+.snapshot-grid-container {
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: repeat(auto-fit, 150px);
+    grid-template-rows: repeat(auto-fit, 150px);
+    max-width: 320px;
+}
+.xnat-dialog-content img { max-width: 100%; }
+
+.panel-default.qcPanel .panel-heading { background: #f0f0f0; color: #000; }
+.panel-default.qcPanel .panel-body { padding: 10px; }
+.panel.qcPanel .panel-element { padding: 2px 0; }
+.panel.qcPanel .panel-element .element-label { text-align: left; padding-right: 6px; }
+.panel.qcPanel h4 { text-transform: uppercase; border-bottom: 1px solid #ccc; }

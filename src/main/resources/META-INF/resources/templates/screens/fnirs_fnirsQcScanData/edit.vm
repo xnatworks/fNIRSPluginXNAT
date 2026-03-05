@@ -1,50 +1,36 @@
 <!-- BEGIN fnirs:fnirsQcScanData -->
-#set($yes_no_options = ["Yes", "No"])
-#set($session = $om.getImageSessionData())
 #set($imageScan_ID = $item.getStringProperty("fnirs:fnirsqcData/scans/scan[$scan_counter]/imageScan_ID"))
 #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/imageScan_ID" $item $imageScan_ID)
 
-<div class="snapshot-row"></div>
-<script>
-    XNAT.app.showFnirsQcImages('${imageSession_ID}','${imageScan_ID}');
-</script>
-<table class="assessment">
-    <tr>
-        <th>Light Fall Off</th>
-        <td>
-            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/lightFalloff" $item $vr)
+<table cellspacing="10" border="0">
+    <tr valign="top">
+        <td width="330">
+            <h4>Snapshots</h4>
+            <div class="snapshot-grid-container"></div>
+            <script>
+                XNAT.app.showFnirsQcImages('${imageSession_ID}','${imageScan_ID}');
+            </script>
         </td>
-    </tr>
-    <tr>
-        <th>Pulse SNR</th>
-        <td>
-            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pulseSnr" $item $vr)
+        <td width="330">
+            <h4>Measurements</h4>
+            <div class="fnirs-measurements $scanId"></div>
+            <script>
+                XNAT.app.showFnirsQcMeasurements('${imageSession_ID}','${imageScan_ID}');
+            </script>
         </td>
-    </tr>
-    <tr>
-        <th>Pulsatility</th>
-        <td>
-            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pulsatility" $item $vr)
-        </td>
-    </tr>
-    <tr>
-        <th>Motion</th>
-        <td>
-            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/motion" $item $vr)
-        </td>
-    </tr>
-    <tr>
-        <th>Pass QC?</th>
-        <td>
-            #qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" $item $vr)
+        <td width="330">
+            <h4>Quality Assessments</h4>
+            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/lightFalloff" "Light Fall Off" $item $vr)
+            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pulseSnr" "Pulse SNR" $item $vr)
+            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pulsatility" "Pulsatility" $item $vr)
+            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/motion" "Motion" $item $vr)
+            #qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" "Pass QC?" $item $vr)
             #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/xnat_qcScanData_id" $item "")
+            #qcCommentBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/comments" $item $vr)
         </td>
-    </tr>
-    <tr>
-        <th valign="top">QC Comments</th>
-        <td>#xdatTextArea("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/comments" $item "" $vr 3 30)</td>
     </tr>
 </table>
+
 
 <!-- END fnirs:fnirsQcScanData -->
 
