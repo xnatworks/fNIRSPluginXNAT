@@ -103,8 +103,13 @@ var XNAT = getObject(XNAT || {});
         });
     };
     
-    XNAT.app.showFnirsQcMeasurements = function(sessionId,scanId){
+    XNAT.app.showFnirsQcMeasurements = function(sessionId,scanId,scanCounter){
         let qcFileUrl = '/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/files/DQ_metrics.json';
+        const knownQcMeasurements = [
+            { xmlProp: 'percentGm', key: 'percentGM' },
+            { xmlProp: 'medSnrRsd', key: 'med_SNR_Rsd' },
+            { xmlProp: 'medGvtd', key: 'med_GVTD' }
+        ]
         XNAT.xhr.get({
             url: XNAT.url.restUrl(qcFileUrl),
             async: true,
@@ -128,6 +133,11 @@ var XNAT = getObject(XNAT || {});
                             label: escapeHTML(key),
                             html: escapeHTML(val)
                         }).element);
+                        let xmlVar = knownQcMeasurements.filter(function(m){ return m.key === key })[0];
+                        if (xmlVar){
+                            // find the hidden input relative to this scan and populate the raw value, not the formatted value
+                            document.getElementById('fnirs:fnirsqcData/scans/scan['+scanCounter+'][@xsi:type=fnirs:fnirsQcScanData]/'+xmlVar.xmlProp).value = measurementJson[key];
+                        }
                     }
                 } else {
                     measurementContainer$.html('No measurements to view');

@@ -14,8 +14,11 @@
         <td width="330">
             <h4>Measurements</h4>
             <div class="fnirs-measurements $scanId"></div>
+            #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/percentGm" $item "")
+            #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/medSnrRsd" $item "")
+            #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/medGvtd" $item "")
             <script>
-                XNAT.app.showFnirsQcMeasurements('${imageSession_ID}','${imageScan_ID}');
+                XNAT.app.showFnirsQcMeasurements('${imageSession_ID}','${imageScan_ID}','${scan_counter}');
             </script>
         </td>
         <td width="330">

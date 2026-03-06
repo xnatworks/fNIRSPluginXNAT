@@ -11,10 +11,9 @@
         </td>
         <td width="330">
             <h4>Measurements</h4>
-            <div class="fnirs-measurements $scanId"></div>
-            <script>
-                XNAT.app.showFnirsQcMeasurements('${imageSession_ID}','${scanId}');
-            </script>
+            #showQcMeasurement("fnirs:fnirsQcScanData/percentGM" "PercentGM" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/medSnrRsd" "med_SNR_Rsd" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/medGvtd" "med_GVTD" $scan)
         </td>
         <td width="330">
             <h4>Quality Assessments</h4>
