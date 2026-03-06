@@ -19,6 +19,36 @@ var XNAT = getObject(XNAT || {});
 }(function() {
     const x2js = new X2JS();
 
+    XNAT.app.viewQcSnapshot = function(selectedImage,scanUrl,alternates){
+        let footerContent = false,
+            title = selectedImage['_name'];
+        if (alternates.length){
+            let options = '';
+            alternates.forEach(function(file){
+                let selected = (file['_name'] === selectedImage['_name']) ? 'selected' : '';
+                options += '<option value="'+scanUrl+'files/'+file['_name']+'" '+selected+'>'+file['_name']+'</option>';
+            });
+            footerContent = 'Select Image: <select id="snapshotSelector">'+options+'</select>';
+            title += ' (1 of '+alternates.length+')';
+        }
+        XNAT.ui.dialog.open({
+            title: title,
+            width: 800,
+            content: '<img id="snapshotInView" src="' + XNAT.url.rootUrl(scanUrl + 'files/' + selectedImage['_URI']) + '" />',
+            maxBtn: true,
+            maxxed: true,
+            footerContent: footerContent,
+            buttons: [
+                { label: 'OK', isDefault: true, close: true }
+            ]
+        })
+    };
+
+    $(document).on('change','#snapshotSelector',function(){
+        var imgPath = XNAT.url.restUrl($(this).find('option:selected').val());
+        $(document).find('#snapshotInView').prop('src',imgPath);
+    });
+
     XNAT.app.showFnirsQcImages = function(sessionId,scanId){
         let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc","GLM_DM","thresholded_map","no_threshold_map"],
             scanUrl = '/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/';
@@ -34,28 +64,30 @@ var XNAT = getObject(XNAT || {});
                 if (qcImages.length > 0) {
                     imgContainer$.empty();
                     qcImageTypes.forEach(function(type){
-                        let imgs = qcImages.filter(function(file){ return file['_name'].indexOf(type) > 0 });
+                        let imgs = qcImages.filter(function(file){ return file['_name'].indexOf(type) > 0 }),
+                            img, altImgs = [];
                         if (imgs.length){
-                            // check for multiple possible matches and filter by last modification date
-                            let img = (imgs.length > 1) ?
-                                imgs.sort(function(a,b){ return (a['_modifiedTime'] > b['_modifiedTime']) ? -1 : 1 })[0] :
-                                imgs[0];
+                            // Check for multiple possible matches and filter by date to return the most recent
+                            // Add other images as alternates that the user can select if desired
+                            if (imgs.length > 1) {
+                                img = imgs.sort(function(a,b){ return (a['_createdTime'] > b['_createdTime']) ? -1 : 1 })[0];
+                                altImgs = imgs;
+                            } else {
+                                img = imgs[0];
+                            }
                             imgContainer$.append(
-                                spawn('.snapshot',{
+                                spawn('div',{
+                                    className: (imgs.length > 1) ? 'snapshot multiple' : 'snapshot',
                                     style: {
                                         'background-image':'url('+ XNAT.url.rootUrl(scanUrl + 'files/' + img['_URI']) + ')',
                                         'margin-right':'1rem'
                                     },
-                                    onclick: function(){ XNAT.ui.dialog.open({
-                                        title: img['_name'],
-                                        width: 800,
-                                        content: '<img src="' + XNAT.url.rootUrl(scanUrl + 'files/' + img['_URI']) + '" />',
-                                        maxBtn: true,
-                                        maxxed: true,
-                                        buttons: [
-                                            { label: 'OK', isDefault: true, close: true }
-                                        ]
-                                    })}
+                                    onclick: function(){
+                                        XNAT.app.viewQcSnapshot(img,scanUrl,altImgs);
+                                    },
+                                    data: {
+                                        multiple: (imgs.length > 1) ? imgs.length : false
+                                    }
                                 })
                             );
                         }
