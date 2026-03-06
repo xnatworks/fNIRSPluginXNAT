@@ -113,7 +113,7 @@
                 <span id="qc-datepicker" class="single us today" data-default="" data-validate="onblur" data-input-id="fnirs:fnirsqcData/date" data-input-name="fnirs:fnirsqcData/date">
                 <script type="text/javascript">
                     #if ($item.getProperty("fnirs:fnirsqcData/date"))
-                        jQuery('#qc-datepicker').data('default','$item.getProperty("date")');
+                        jQuery('#qc-datepicker').data('default','$item.getProperty("fnirs:fnirsqcData/date")');
                     #else
                         jQuery('#qc-datepicker').data('default',XNAT.data.todaysDate.us);
                     #end

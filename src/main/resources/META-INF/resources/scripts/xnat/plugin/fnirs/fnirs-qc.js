@@ -21,20 +21,21 @@ var XNAT = getObject(XNAT || {});
 
     XNAT.app.viewQcSnapshot = function(selectedImage,scanUrl,alternates){
         let footerContent = false,
-            title = selectedImage['_name'];
+            title = selectedImage['_name'],
+            content = '';
         if (alternates.length){
             let options = '';
+            title = 'Multiple Snapshots ('+alternates.length+') Found';
             alternates.forEach(function(file){
                 let selected = (file['_name'] === selectedImage['_name']) ? 'selected' : '';
                 options += '<option value="'+scanUrl+'files/'+file['_name']+'" '+selected+'>'+file['_name']+'</option>';
             });
-            footerContent = 'Select Image: <select id="snapshotSelector">'+options+'</select>';
-            title += ' (1 of '+alternates.length+')';
+            content = '<p>Select Image: <select id="snapshotSelector">'+options+'</select></p>';
         }
         XNAT.ui.dialog.open({
             title: title,
             width: 800,
-            content: '<img id="snapshotInView" src="' + XNAT.url.rootUrl(scanUrl + 'files/' + selectedImage['_URI']) + '" />',
+            content: content + '<p><img id="snapshotInView" src="' + XNAT.url.rootUrl(scanUrl + 'files/' + selectedImage['_URI']) + '" /></p>',
             maxBtn: true,
             maxxed: true,
             footerContent: footerContent,
