@@ -1,33 +1,43 @@
 /*
  * fnirs-plugin: build.gradle
  */
-plugins {
-    id "java"
-    id "org.nrg.xnat.build.xnat-data-builder" version "1.8.7"
-    id "maven-publish"
-    id "io.freefair.lombok" version "6.0.0-m2"
-    id "com.palantir.git-version" version "0.12.1"
+buildscript {
+    ext {
+        vXnat = "1.10.0-RC-SNAPSHOT"
+        vPluginVersion = "1.2.2-SNAPSHOT"
+        vPluginDescription = "XNAT fNIRS Plugin"
+    }
 }
 
-group "org.nrg.xnatx.plugins"
-version "1.2.2-SNAPSHOT"
-description "fNIRS Plugin for XNAT."
+plugins {
+    id "java"
+    id "maven-publish"
+    id "com.palantir.git-version" version "5.0.0"
+    id "io.freefair.lombok" version "9.2.0"
+    id "io.spring.dependency-management" version "1.1.7"
+    id "org.nrg.xnat.build.xnat-data-builder" version "${vXnat}"
+}
+
+group = "org.nrg.xnatx.plugins"
+version = vPluginVersion
+description = vPluginDescription
 
 repositories {
     mavenLocal()
-    maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-release" }
-    maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot" }
+    maven { url = "https://nrgxnat.jfrog.io/nrgxnat/libs-release" }
+    maven { url = "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot" }
     mavenCentral()
 }
 
 configurations {
+    implementation.extendsFrom(implementAndInclude)
     implementation.extendsFrom(xnatProvided)
-    implementation.canBeResolved(true)
-    testImplementation.exclude group: 'org.slf4j', module: 'log4j-over-slf4j'
+    testImplementation.exclude group: "org.slf4j", module: "log4j-over-slf4j"
 }
 
 dependencies {
-    xnatProvided platform("org.nrg:parent:1.8.7")
+    xnatProvided platform("org.nrg:parent:${vXnat}")
+
     xnatProvided "org.nrg:framework"
     xnatProvided "org.nrg.xnat:xnat-data-models"
     xnatProvided "org.nrg.xnat:web"
@@ -36,16 +46,74 @@ dependencies {
     xnatProvided "dcm4che:dcm4che-core"
     xnatProvided "io.springfox:springfox-swagger2"
     xnatProvided "io.springfox:springfox-swagger-ui"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.mockito:mockito-core"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
 
-dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-    testImplementation "org.mockito:mockito-core:3.+"
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+dependencyManagement {
+    imports {
+        mavenBom "org.nrg:parent:${vXnat}"
+    }
+    generatedPomCustomization {
+        enabled = false
+    }
 }
 
 test {
     useJUnitPlatform()
+}
+
+// Not required in a standard build, but the XNAT data builder generates code from XNAT data-type
+// schemas that the compiler needs to know about.
+sourceSets {
+    main {
+        java {
+            srcDir "src/main/java"
+            srcDir "build/xnat-generated/src/main/java"
+        }
+        resources {
+            srcDir "src/main/resources"
+            srcDir "build/xnat-generated/src/main/resources"
+        }
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+compileJava {
+    dependsOn xnatDataBuilder
+    options.fork = false
+}
+
+jar {
+    doLast {
+        if (!gradle.taskGraph.hasTask(":xnatPluginJar")) {
+            logger.warn "WARNING: You should generally run xnatPluginJar instead of jar task for this plugin"
+        }
+    }
+    from {
+        (configurations.compileClasspath - configurations.xnatProvided).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+tasks.register("xnatPluginJar", Jar) {
+    zip64 = true
+    archiveClassifier = "xpl"
+    from {
+        configurations.implementAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
 }
 
 // Pulls in the Jenkins BUILD_NUMBER environment variable if available.
@@ -62,7 +130,7 @@ try {
     commitDistance = gitDetails.commitDistance
     lastTag = gitDetails.lastTag
     isCleanTag = gitDetails.isCleanTag
-} catch (IllegalArgumentException ignored) {
+} catch (IllegalArgumentException e) {
     logger.info "Got an error trying to read VCS metadata from git. It's possible this project is not under VCS control. Using placeholder values for manifest entries."
     isDirty = true
     branchName = "Unknown"
@@ -73,63 +141,20 @@ try {
     isCleanTag = false
 }
 
-logger.info "Build-Date:              ${buildDate}"
-logger.info "Build-Number:            ${buildNumber}"
-logger.info "Implementation-Version:  ${version}"
-logger.info "Implementation-Sha-Full: ${gitHashFull}"
-logger.info "Implementation-Sha:      ${gitHash}"
-logger.info "Implementation-Commit:   ${commitDistance}"
-logger.info "Implementation-LastTag:  ${lastTag}"
-logger.info "Implementation-Branch:   ${branchName}"
-logger.info "Implementation-CleanTag: ${isCleanTag}"
-logger.info "Implementation-Dirty:    ${isDirty}"
-
-ext.gitManifest = manifest {
-    attributes "Application-Name": "fNIRS-PLUGIN",
-            "Build-Date": buildDate,
-            "Build-Number": buildNumber,
-            "Implementation-Version": project.version,
-            "Implementation-Sha": gitHash,
-            "Implementation-Sha-Full": gitHashFull,
-            "Implementation-Commit": commitDistance,
-            "Implementation-LastTag": lastTag,
-            "Implementation-Branch": branchName,
-            "Implementation-CleanTag": isCleanTag,
-            "Implementation-Dirty": isDirty
-}
-
-// Configure the compileJava task to call the xnatDataBuilder task before trying to compile any
-// Java code in the plugin. This is required for custom data types
-compileJava.dependsOn project.tasks["xnatDataBuilder"]
-
-// Not required in a standard build, but the XNAT data builder generates code from XNAT data-type
-// schemas that the compiler needs to know about.
-sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-            srcDir "build/xnat-generated/src/main/java"
-        }
-        resources {
-            srcDir 'src/main/resources'
-            srcDir "build/xnat-generated/src/main/resources"
-        }
-    }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-jar {
-    manifest = project.manifest {
-        from gitManifest
-    }
-    from {
-        (configurations.implementation - configurations.xnatProvided).collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes "Application-Name": vPluginDescription,
+                "Build-Date": buildDate,
+                "Build-Number": buildNumber,
+                "Implementation-Version": vPluginVersion,
+                "Implementation-Sha": gitHash,
+                "Implementation-Sha-Full": gitHashFull,
+                "Implementation-Commit": commitDistance,
+                "Implementation-LastTag": lastTag,
+                "Implementation-Branch": branchName,
+                "Implementation-CleanTag": isCleanTag,
+                "Implementation-Dirty": isDirty
     }
 }
 
@@ -137,6 +162,10 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+
+            artifacts {
+                artifact xnatPluginJar
+            }
 
             versionMapping {
                 usage("java-api") {
@@ -165,6 +194,11 @@ publishing {
                         name = "Mohana Ramaratnam"
                         email = "mohana@xnatworks.io"
                     }
+                    developer {
+                        id = "rherrick"
+                        name = "Rick Herrick"
+                        email = "rick@xnatworks.io"
+                    }
                 }
                 scm {
                     connection = "scm:git:git://github.com/xnatworks/fNIRSPluginXNAT.git"
@@ -182,3 +216,4 @@ publishing {
         }
     }
 }
+

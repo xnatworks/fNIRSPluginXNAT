@@ -1,9 +1,11 @@
 package org.nrg.xnatx.plugins.fnirs.sessionBuilder;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.axis.utils.StringUtils;
-import org.nrg.xdat.XDAT;
-import org.nrg.xdat.bean.*;
+import org.nrg.xdat.bean.CatCatalogBean;
+import org.nrg.xdat.bean.CatEntryBean;
+import org.nrg.xdat.bean.FnirsFnirsscandataBean;
+import org.nrg.xdat.bean.XnatImagescandataBean;
+import org.nrg.xdat.bean.XnatResourcecatalogBean;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,15 +15,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 @Slf4j
 public class FNIRSScanBuilder implements Callable<XnatImagescandataBean> {
 
-    private final Path scanDir;
+    private final Path                   scanDir;
     private final FnirsFnirsscandataBean fnirsScan;
 
     public FNIRSScanBuilder(final Path scanDir) {
-        this.scanDir = scanDir;
+        this.scanDir   = scanDir;
         this.fnirsScan = new FnirsFnirsscandataBean();
     }
 
@@ -35,20 +38,7 @@ public class FNIRSScanBuilder implements Callable<XnatImagescandataBean> {
         fnirsScan.setType("FNIRS");
         fnirsScan.setUid(UUID.randomUUID().toString());
 
-//        fnirsScan.setOperator(analyzedClickInfo.getUserLabelNameSet().getUser());
-//
-//        if (StringUtils.isEmpty(analyzedClickInfo.getClickNumber().getClickNumber())) {
-//            log.info("Unable to find a UID in AnalyzedClickInfo.txt for scan {}. Will generate a random UID instead.", bliScan.getId());
-//            fnirsScan.setUid(UUID.randomUUID().toString());
-//        } else {
-//            fnirsScan.setUid(analyzedClickInfo.getClickNumber().getClickNumber());
-//        }
-
-        // Set scan datetime
-//        fnirsScan.setStartDate(analyzedClickInfo.getLuminescentImage().getAcquisitionDateTime());
-
-        File resourceCatalogXml = new File(scanDir.toFile(), "scan_catalog.xml");
-        XnatResourcecatalogBean resourceCatalog = new XnatResourcecatalogBean();
+        XnatResourcecatalogBean resourceCatalog    = new XnatResourcecatalogBean();
 
         resourceCatalog.setUri(Paths.get("SCANS", id, "scan_catalog.xml").toString());
         resourceCatalog.setLabel("FNIRS");
@@ -58,13 +48,14 @@ public class FNIRSScanBuilder implements Callable<XnatImagescandataBean> {
 
         CatCatalogBean catCatalogBean = new CatCatalogBean();
 
-        Files.list(scanDir)
-                .map(this::createCatalogEntry)
-                .forEach(catCatalogBean::addEntries_entry);
+        try (final Stream<Path> files = Files.list(scanDir)) {
+            files.map(this::createCatalogEntry)
+                 .forEach(catCatalogBean::addEntries_entry);
+        }
 
         fnirsScan.addFile(resourceCatalog);
 
-        try (FileWriter resourceCatalogXmlWriter = new FileWriter(resourceCatalogXml)) {
+        try (FileWriter resourceCatalogXmlWriter = new FileWriter(new File(scanDir.toFile(), "scan_catalog.xml"))) {
             catCatalogBean.toXML(resourceCatalogXmlWriter, true);
         } catch (IOException e) {
             log.error("Unable to write scan catalog", e);

@@ -2,23 +2,17 @@ package org.nrg.xnatx.plugins.fnirs.sessionBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 import org.nrg.session.SessionBuilder;
-import org.nrg.xdat.XDAT;
-import org.nrg.xdat.bean.FnirsFnirsscandataBean;
 import org.nrg.xdat.bean.FnirsFnirssessiondataBean;
 import org.nrg.xdat.bean.XnatImagesessiondataBean;
-import org.nrg.xdat.model.XnatImagescandataI;
-import org.nrg.xdat.om.FnirsFnirssessiondata;
 import org.nrg.xnat.helpers.prearchive.PrearcUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class FNIRSSessionBuilder extends SessionBuilder {
@@ -47,38 +41,23 @@ public class FNIRSSessionBuilder extends SessionBuilder {
 
         // Initialize the session and populate
         FnirsFnirssessiondataBean fnirsSession = new FnirsFnirssessiondataBean();
-
         fnirsSession.setPrearchivepath(sessionDir.getPath());
         fnirsSession.setProject(project);
         fnirsSession.setSubjectId(subject);
         fnirsSession.setLabel(label);
 
-
         // Build scans
-        Path scanDir = sessionDir.toPath().resolve("SCANS");
-        List<Path> scans = Files.list(scanDir).filter(Files::isDirectory).collect(Collectors.toList());
-
-        for (Path scan : scans) {
-            final FNIRSScanBuilder fnirsScanBuilder = new FNIRSScanBuilder(scan);
-            fnirsSession.addScans_scan(fnirsScanBuilder.call());
+        try (final Stream<Path> files = Files.list(sessionDir.toPath().resolve("SCANS"))) {
+            files.filter(Files::isDirectory)
+                 .forEach(folder -> {
+                     try {
+                         final FNIRSScanBuilder builder = new FNIRSScanBuilder(folder);
+                         fnirsSession.addScans_scan(builder.call());
+                     } catch (IOException e) {
+                         throw new RuntimeException("An error occurred trying to build a scan from the folder " + folder, e);
+                     }
+                 });
         }
-
-//         Set session date
-//        Optional<Date> sessionDate = fnirsSession.getScans_scan().stream()
-//                .map(XnatImagescandataI::getStartDate)
-//                .map(d -> (Date) d)
-//                .distinct()
-//                .sorted()
-//                .findFirst();
-//        sessionDate.ifPresent(fnirsSession::setDate);
-
-        // Set operator
-//        Optional<String> operator = fnirsSession.getScans_scan().stream()
-//                .map(XnatImagescandataI::getOperator)
-//                .distinct()
-//                .findFirst();
-//        operator.ifPresent(fnirsSession::setOperator);
-
         return fnirsSession;
     }
 }
