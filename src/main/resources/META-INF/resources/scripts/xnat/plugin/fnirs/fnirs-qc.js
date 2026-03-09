@@ -17,45 +17,130 @@ var XNAT = getObject(XNAT || {});
         return factory();
     }
 }(function() {
+    const x2js = new X2JS();
+
+    XNAT.app.viewQcSnapshot = function(selectedImage,scanUrl,alternates){
+        let footerContent = false,
+            title = selectedImage['_name'],
+            content = '';
+        if (alternates.length){
+            let options = '';
+            title = 'Multiple Snapshots ('+alternates.length+') Found';
+            alternates.forEach(function(file){
+                let selected = (file['_name'] === selectedImage['_name']) ? 'selected' : '';
+                options += '<option value="'+scanUrl+'files/'+file['_name']+'" '+selected+'>'+file['_name']+'</option>';
+            });
+            content = '<p>Select Image: <select id="snapshotSelector">'+options+'</select></p>';
+        }
+        XNAT.ui.dialog.open({
+            title: title,
+            width: 800,
+            content: content + '<p><img id="snapshotInView" src="' + XNAT.url.rootUrl(scanUrl + 'files/' + selectedImage['_URI']) + '" /></p>',
+            maxBtn: true,
+            maxxed: true,
+            footerContent: footerContent,
+            buttons: [
+                { label: 'OK', isDefault: true, close: true }
+            ]
+        })
+    };
+
+    $(document).on('change','#snapshotSelector',function(){
+        var imgPath = XNAT.url.restUrl($(this).find('option:selected').val());
+        $(document).find('#snapshotInView').prop('src',imgPath);
+    });
 
     XNAT.app.showFnirsQcImages = function(sessionId,scanId){
-        let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc"];
-        let qcImages = [];
-        XNAT.xhr.getJSON({
-            url: XNAT.url.restUrl('/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/files'),
+        let qcImageTypes = ["TT_dqc","SMI_dqc","Cap_dqc","nlrGray_dqc","GLM_DM","thresholded_map","no_threshold_map"],
+            scanUrl = '/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/';
+        $(document).find('.panel.'+scanId + ' .snapshot-grid-container').html('Loading QC images for '+scanId);
+        XNAT.xhr.get({
+            url: XNAT.url.restUrl(scanUrl),
+            async: true,
             fail: function(e){ console.error(e) },
             success: function(data){
-                qcImages=data.ResultSet.Result;
+                const imgContainer$ = $(document).find('.panel.'+scanId + ' .snapshot-grid-container');
+                let rawData = x2js.xml2json(data);
+                let qcImages=rawData.Catalog.entries.entry;
                 if (qcImages.length > 0) {
+                    imgContainer$.empty();
                     qcImageTypes.forEach(function(type){
-                        let img = qcImages.filter(function(file){ return file['Name'].indexOf(type) > 0 && file['Name'].indexOf('.png') > 0})[0];
-                        if (img) {
-                            $(document).find('.report-section.'+scanId + ' .snapshot-row').append(
-                                spawn('.snapshot-container',{
+                        let imgs = qcImages.filter(function(file){ return file['_name'].indexOf(type) > 0 }),
+                            img, altImgs = [];
+                        if (imgs.length){
+                            // Check for multiple possible matches and filter by date to return the most recent
+                            // Add other images as alternates that the user can select if desired
+                            if (imgs.length > 1) {
+                                img = imgs.sort(function(a,b){ return (a['_createdTime'] > b['_createdTime']) ? -1 : 1 })[0];
+                                altImgs = imgs;
+                            } else {
+                                img = imgs[0];
+                            }
+                            imgContainer$.append(
+                                spawn('div',{
+                                    className: (imgs.length > 1) ? 'snapshot multiple' : 'snapshot',
                                     style: {
-                                        'background-image':'url(' + XNAT.url.rootUrl(img['URI']) + ')',
+                                        'background-image':'url('+ XNAT.url.rootUrl(scanUrl + 'files/' + img['_URI']) + ')',
                                         'margin-right':'1rem'
                                     },
-                                    onclick: function(){ XNAT.ui.dialog.open({
-                                        title: img['Name'],
-                                        width: 800,
-                                        content: '<img src="' + XNAT.url.rootUrl(img['URI']) + '" />',
-                                        maxBtn: true,
-                                        maxxed: true,
-                                        buttons: [
-                                            { label: 'OK', isDefault: true, close: true }
-                                        ]
-                                    })}
+                                    onclick: function(){
+                                        XNAT.app.viewQcSnapshot(img,scanUrl,altImgs);
+                                    },
+                                    data: {
+                                        multiple: (imgs.length > 1) ? imgs.length : false
+                                    }
                                 })
                             );
                         }
                     });
                 } else {
-                    let scanSection=$(document).find('.report-section.'+scanId);
-                    scanSection.find('.snapshot-row').empty().append('No snapshots to view');
-                    scanSection.find('.assessment').hide();
-                    scanSection.find('input').prop('disabled','disabled');
-                    scanSection.find('select').prop('disabled','disabled');
+                    imgContainer$.html('No snapshots to view');
+                    $(document).find('.panel.'+scanId+' .assessment').hide();
+                    $(document).find('.panel.'+scanId+' input').prop('disabled','disabled');
+                    $(document).find('.panel.'+scanId+' select').prop('disabled','disabled');
+                }
+            }
+        });
+    };
+    
+    XNAT.app.showFnirsQcMeasurements = function(sessionId,scanId,scanCounter){
+        let qcFileUrl = '/data/experiments/'+sessionId+'/scans/'+scanId+'/resources/QC/files/DQ_metrics.json';
+        const knownQcMeasurements = [
+            { xmlProp: 'percentGm', key: 'percentGM' },
+            { xmlProp: 'medSnrRsd', key: 'med_SNR_Rsd' },
+            { xmlProp: 'medGvtd', key: 'med_GVTD' }
+        ]
+        XNAT.xhr.get({
+            url: XNAT.url.restUrl(qcFileUrl),
+            async: true,
+            fail: function(e){
+                if (e.status == 404) {
+                    $(document).find('.'+scanId + '.fnirs-measurements').html('No measurements to view');
+                } else { console.error(e); }
+            },
+            success: function(data){
+                const measurementContainer$ = $(document).find('.'+scanId + '.fnirs-measurements');
+                let measurementJson = JSON.parse(data);
+                if (Object.keys(measurementJson).length > 0) {
+                    for (let key in measurementJson){
+                        let val = measurementJson[key];
+                        if (!isNaN(val * 1)){
+                            // convert string to number to access JS number functions
+                            val = (val * 1).toPrecision(4);
+                            val = (val > 0.01) ? val : (val * 1).toExponential(3);
+                        }
+                        measurementContainer$.append(XNAT.ui.panel.element({
+                            label: escapeHTML(key),
+                            html: escapeHTML(val)
+                        }).element);
+                        let xmlVar = knownQcMeasurements.filter(function(m){ return m.key === key })[0];
+                        if (xmlVar){
+                            // find the hidden input relative to this scan and populate the raw value, not the formatted value
+                            document.getElementById('fnirs:fnirsqcData/scans/scan['+scanCounter+'][@xsi:type=fnirs:fnirsQcScanData]/'+xmlVar.xmlProp).value = measurementJson[key];
+                        }
+                    }
+                } else {
+                    measurementContainer$.html('No measurements to view');
                 }
             }
         });

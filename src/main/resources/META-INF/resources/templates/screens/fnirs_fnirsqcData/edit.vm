@@ -2,191 +2,167 @@
 
 #set ($imageSessionType = $om.getImageSessionData().getXSIType())
 
-#macro (qcYesNoSelect $name $qcItem $vr)
-	#if ($vr)
-		#if($vr.getField($name))
-			<font color="red">&#8658</font>
-		#end
-	#end
-	<input type="radio" name="$name" value="0" #if($qcItem.getStringProperty($name) == "0")) checked #end />No
-	<input type="radio" name="$name" value="1" #if($qcItem.getStringProperty($name) == "1")) checked #end />Yes
+#macro (qcEnumeratedRating $name $label $qcItem $vr)
+	<div class="panel-element #if($vr) #if($vr.getField($name)) invalid #end #end">
+        <label class="element-label" for="$name">$label</label>
+        <div class="element-wrapper">
+            <label>
+                <select name="$name">
+                    <option value="0" #if($qcItem.getStringProperty($name) == "0") selected #end>Select A Rating</option>
+                    <option value="1" #if($qcItem.getStringProperty($name) == "1") selected #end>1</option>
+                    <option value="2" #if($qcItem.getStringProperty($name) == "2") selected #end>2</option>
+                    <option value="3" #if($qcItem.getStringProperty($name) == "3") selected #end>3</option>
+                    <option value="4" #if($qcItem.getStringProperty($name) == "4") selected #end>4</option>
+                    <option value="5" #if($qcItem.getStringProperty($name) == "5") selected #end>5</option>
+                </select>
+            </label>
+        </div>
+        <div class="clear"></div>
+    </div>
 #end
 
-#macro (qcEnumeratedRating $name $qcItem $vr)
-    #if ($vr)
-        #if($vr.getField($name))
-            <font color="#c00">&#8658</font>
-        #end
-    #end
-    <select name="$name">
-        <option value="0" #if($qcItem.getStringProperty($name) == "0") selected #end>Select A Rating</option>
-        <option value="1" #if($qcItem.getStringProperty($name) == "1") selected #end>1</option>
-        <option value="2" #if($qcItem.getStringProperty($name) == "2") selected #end>2</option>
-        <option value="3" #if($qcItem.getStringProperty($name) == "3") selected #end>3</option>
-        <option value="4" #if($qcItem.getStringProperty($name) == "4") selected #end>4</option>
-        <option value="5" #if($qcItem.getStringProperty($name) == "5") selected #end>5</option>
-    </select>
+#macro (qcYesNoSelect $name $label $qcItem $vr)
+	<div class="panel-element #if($vr) #if($vr.getField($name)) invalid #end #end">
+	    <label class="element-label" for="$name">$label</label>
+	    <div class="element-wrapper">
+            <input type="radio" name="$name" value="0" #if($qcItem.getStringProperty($name) == "0")) checked #end />No
+            <input type="radio" name="$name" value="1" #if($qcItem.getStringProperty($name) == "1")) checked #end />Yes
+	    </div>
+	    <div class="clear"></div>
+	</div>
 #end
 
+#macro (qcCommentBox $name $qcItem $vr)
+	<div class="panel-element #if($vr) #if($vr.getField($name)) invalid #end #end">
+	    <label class="element-label" for="$name">Scan Comments</label>
+	    <div class="element-wrapper">
+            <textarea id="$name" name="$name" rows="6"></textarea>
+	    </div>
+	    <div class="clear"></div>
+	</div>
+#end
 
-#set($months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"])
-#set($days = [ 1..31 ])
-#set($years = [ $!turbineUtils.getYear()..1900])
 
 #if ($data.message)
 	<div class="alert">$data.message</div>
 #end
 
-<style>
-    .report-section {
-        margin: 2rem 0;
-        padding: 2rem 0;
-    }
-    .report-section + report-section {
-        border-top: 1px solid #ccc;
-    }
-    .snapshot-container {
-        background-color: #888;
-        background-position: center;
-        background-size: contain;
-        border-radius: 10px;
-        display: inline-block;
-        height: 200px;
-        width: 200px;
-    }
-    .snapshot-row { background: #f0f0f0; border: 1px solid #ccc; margin: 1rem 0; padding: 0.25rem; }
-    .xnat-dialog-content img { max-width: 100%; }
-</style>
+<link rel="stylesheet" type="text/css" href="$content.getURI("/style/fnirs.css")" />
 
 <form ID="form1" name="form1" method="post" action="$link.setAction("ModifyManualQC")">
-<input type="hidden" name="project" value="$!{project}" >
-<input type="hidden" name="$item.getXSIType()/ID" id="$item.getXSIType()/ID" value=""/> 
-#if($vr)
-	<div class="error">Invalid parameters:<br />$vr.toHTML()</div>
-    <hr>
-#end
+    <input type="hidden" name="project" value="$!{project}" >
+    <input type="hidden" name="$item.getXSIType()/ID" id="$item.getXSIType()/ID" value=""/>
+    #if($vr)
+        <div class="error">Invalid parameters:<br />$vr.toHTML()</div>
+    #end
 
-<table width="100%">
-	<tr>
-		<td>
-			<table width="100%">
-				<tr>
-					<td align="left" valign="middle">
-						<h2>Edit fNIRS QC Assessment</h2>
-					</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<table width="100%">
-				<tr>
-					<td valign="top">
-						<table>
-                            <tr>
-                                <td>$displayManager.getSingularDisplayNameForProject()</td>
-                                <td>
-                                    <div id="project_placeholder">$!om.getProjectDisplayID()</div>
-                                </td>
-                                #if($!om.getPass() && $turbineUtils.canDelete($user, $om.getItem()))
-                                    <td>
-                                        <a onclick="modifyProject();"><i class="fa fa-edit" title="Edit Project"></i></a>
-                                        <input type="hidden" id="$om.getXSIType()/project" name="$om.getXSIType()/project" value="$!om.getProject()"/>
-                                        <script type="text/javascript">
-                                            function modifyProject(){
-                                                if(window.projectEditor==undefined){
-                                                    var config =new Object();
-                                                    if(window.currentID!=""){
-                                                        config.uri=XNAT.app.current_uri;
-                                                    }
-                                                    window.projectEditor=new ProjectEditor(config);
-                                                    window.projectEditor.onModification.subscribe(function (obj){
-                                                        document.getElementById("project_placeholder").innerHTML=this.new_project_name;
-                                                        document.getElementById("$om.getXSIType()/project").value=this.new_project;
-                                                        XNAT.app.current_uri=serverRoot+"/REST/projects/" + this.new_project + "/subjects/$om.getImageSessionData().getSubjectId()/experiments/$om.getImageSessionData().getId()/assessors/$om.getId()";
-                                                        config.uri=XNAT.app.current_uri;
-                                                        confirmValues();
-                                                    });
-                                                    window.projectEditor.render();
-                                                }
-                                                window.projectEditor.panel.show();
-                                            }
-                                        </script>
-                                    </td>
-                                #end
-                            </tr>
-							<tr>
-								<td>$displayManager.getSingularDisplayNameForImageSession() ID</td>
-								<td>
-									#set($imageSession_ID = $item.getStringProperty("fnirs:fnirsqcData/imageSession_ID"))
-									#if ($imageSession_ID)
-										#set ($click = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$imageSessionType).addPathInfo('search_field','xnat:imageSessionData.ID').addPathInfo('search_value',$imageSession_ID).addPathInfo('popup',$!popup).addPathInfo('project',$project)" )
-										<a href="$click">
-											$imageSession_ID
-										</a>
-										#xdatHiddenBox("fnirs:fnirsqcData/imageSession_ID" $item $imageSession_ID)
-									#end
-									
-									#xdatHiddenBox("fnirs:fnirsqcData/project" $item $item.getStringProperty("fnirs:fnirsqcData/project"))
-									
-									#xdatHiddenBox("fnirs:fnirsqcData.ID" $item $item.getStringProperty("fnirs:fnirsqcData.ID"))
-								</td>
-							</tr>
-							<tr><td>Label</td><td>#xdatStringBoxWClass("fnirs:fnirsqcData/label" $item "" $vr "required")</td></tr>
-							<tr><td>QC Date</td><td>#xdatDateBox("fnirs:fnirsqcData/date" $item $vr $years)</td></tr>
-							<tr><td>Rater</td><td>#xdatStringBox("fnirs:fnirsqcData/rater" $item "" $vr)</td></tr>
-							<tr><td valign="top">Comments</td><td>#xdatTextArea("fnirs:fnirsqcData/comments" $item "" $vr 3 30)</td></tr>
-						</table>
-					</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-	<tr>
-	<td>
-	    #parse("/screens/EditProjectSpecificFields.vm")
-	</td>
-	</tr>
-
-	<tr>
-		<td>
-<!-- BEGIN fnirs:fnirsqcData -->
-            <script type="application/javascript" src="$content.getURI("/scripts/xnat/plugin/fnirs/fnirs-qc.js")"></script>
-			<h2>Scans</h2>
-<!-- BEGIN fnirs:fnirsqcData/scans/scan -->
-            #set($scans = $item.getChildItems("fnirs:fnirsqcData/scans/scan"))
-
-            #if ($scans && $scans.size() > 0)
-                #set($scan_counter = 0)
-                #foreach($scan in $scans)
-                    #set($scanId = $scan.getProperty("imageScan_ID"))
-                    <div class="report-section $scanId">
-                        <h3>$scanId</h3>
-                        #parse($turbineUtils.getTemplateName("edit",$scan.getXSIType(),$project))
-                    </div>
-                    #set($scan_counter = $scan_counter + 1)
-                #end
+    <h2>Edit fNIRS QC Assessment</h2>
+    <table>
+        <tr>
+            <td>$displayManager.getSingularDisplayNameForProject()</td>
+            <td>
+                <div id="project_placeholder">$!om.getProjectDisplayID()</div>
+            </td>
+            #if($!om.getPass() && $turbineUtils.canDelete($user, $om.getItem()))
+                <td>
+                    <a onclick="modifyProject();"><i class="fa fa-edit" title="Edit Project"></i></a>
+                    <input type="hidden" id="$om.getXSIType()/project" name="$om.getXSIType()/project" value="$!om.getProject()"/>
+                    <script type="text/javascript">
+                        function modifyProject(){
+                            if(window.projectEditor==undefined){
+                                var config =new Object();
+                                if(window.currentID!=""){
+                                    config.uri=XNAT.app.current_uri;
+                                }
+                                window.projectEditor=new ProjectEditor(config);
+                                window.projectEditor.onModification.subscribe(function (obj){
+                                    document.getElementById("project_placeholder").innerHTML=this.new_project_name;
+                                    document.getElementById("$om.getXSIType()/project").value=this.new_project;
+                                    XNAT.app.current_uri=serverRoot+"/REST/projects/" + this.new_project + "/subjects/$om.getImageSessionData().getSubjectId()/experiments/$om.getImageSessionData().getId()/assessors/$om.getId()";
+                                    config.uri=XNAT.app.current_uri;
+                                    confirmValues();
+                                });
+                                window.projectEditor.render();
+                            }
+                            window.projectEditor.panel.show();
+                        }
+                    </script>
+                </td>
             #end
+        </tr>
+        <tr>
+            <td>$displayManager.getSingularDisplayNameForImageSession() ID</td>
+            <td>
+                #set($imageSession_ID = $item.getStringProperty("fnirs:fnirsqcData/imageSession_ID"))
+                #if ($imageSession_ID)
+                    #set ($click = "$link.setAction('DisplayItemAction').addPathInfo('search_element',$imageSessionType).addPathInfo('search_field','xnat:imageSessionData.ID').addPathInfo('search_value',$imageSession_ID).addPathInfo('popup',$!popup).addPathInfo('project',$project)" )
+                    <a href="$click">
+                        $imageSession_ID
+                    </a>
+                    #xdatHiddenBox("fnirs:fnirsqcData/imageSession_ID" $item $imageSession_ID)
+                #end
 
-<!-- END fnirs:fnirsqcData/scans/scan -->
-<!-- END fnirs:fnirsqcData -->
-		</td>
-	</tr>
-	#if($item.getStringProperty("fnirs:fnirsqcData.ID"))
-		#auditBoxes("3" "" "" "Modified Manual QC")
-	#else
-		#auditBoxes("3" "" "Standard QC" "Created Manual QC")
-		#hideFormJustification()
+                #xdatHiddenBox("fnirs:fnirsqcData/project" $item $item.getStringProperty("fnirs:fnirsqcData/project"))
 
-	#end
-	<tr>
-		<td>
-		#xdatEditProps($item $edit_screen)
-		<input type="submit" name="eventSubmit_doInsert" value="Submit"/>
-		</td>
-	</tr>
-</table>
+                #xdatHiddenBox("fnirs:fnirsqcData.ID" $item $item.getStringProperty("fnirs:fnirsqcData.ID"))
+            </td>
+        </tr>
+        <tr><td>Label</td><td>#xdatStringBoxWClass("fnirs:fnirsqcData/label" $item "" $vr "required")</td></tr>
+        <tr><td>QC Date</td>
+            <td>
+                <span id="qc-datepicker" class="single us today" data-default="" data-validate="onblur" data-input-id="fnirs:fnirsqcData/date" data-input-name="fnirs:fnirsqcData/date">
+                <script type="text/javascript">
+                    #if ($item.getProperty("fnirs:fnirsqcData/date"))
+                        jQuery('#qc-datepicker').data('default','$item.getProperty("fnirs:fnirsqcData/date")');
+                    #else
+                        jQuery('#qc-datepicker').data('default',XNAT.data.todaysDate.us);
+                    #end
+                    XNAT.app.datePicker.init(jQuery('#qc-datepicker'));
+                </script>
+            </td>
+        </tr>
+        <tr><td>Rater</td><td>#xdatStringBox("fnirs:fnirsqcData/rater" $item "" $vr)</td></tr>
+        <tr><td valign="top">Comments</td><td>#xdatTextArea("fnirs:fnirsqcData/comments" $item "" $vr 3 30)</td></tr>
+    </table>
+
+    #parse("/screens/EditProjectSpecificFields.vm")
+    <br>
+    <!-- BEGIN fnirs:fnirsqcData -->
+    <script type="application/javascript" src="$content.getURI("/scripts/xnat/plugin/fnirs/fnirs-qc.js")"></script>
+    <h2>Scans</h2>
+
+    <!-- BEGIN fnirs:fnirsqcData/scans/scan -->
+    #set($scans = $item.getChildItems("fnirs:fnirsqcData/scans/scan"))
+
+    #if ($scans && $scans.size() > 0)
+        #set($scan_counter = 0)
+        #foreach($scan in $scans)
+            #set($scanId = $scan.getProperty("imageScan_ID"))
+            <div class="panel panel-default qcPanel $scanId">
+                <div class="panel-heading">
+                    <h3>$scanId</h3>
+                </div>
+                <div class="panel-body">
+                    #parse($turbineUtils.getTemplateName("edit",$scan.getXSIType(),$project))
+                </div>
+            </div>
+            #set($scan_counter = $scan_counter + 1)
+        #end
+    #end
+
+    <!-- END fnirs:fnirsqcData/scans/scan -->
+    <!-- END fnirs:fnirsqcData -->
+
+
+    #if($item.getStringProperty("fnirs:fnirsqcData.ID"))
+        #auditBoxes("3" "" "" "Modified Manual QC")
+    #else
+        #auditBoxes("3" "" "Standard QC" "Created Manual QC")
+        #hideFormJustification()
+    #end
+
+    #xdatEditProps($item $edit_screen)
+    <p><input type="submit" name="eventSubmit_doInsert" value="Submit"/></p>
 </form>
 
 <script type="text/javascript">

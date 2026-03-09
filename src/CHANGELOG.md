@@ -2,6 +2,14 @@
 
 The fNIRS plugin adds support for fNIRS optical imaging datatypes in XNAT, as commissioned by the OXI project at WashU. This changelog tracks updates to that support. 
 
+## fNIRS Plugin 1.2.1
+_Released Mar 2026_
+
+**Features**
+* OXI-15: Add support for parsing and storing JSON QC measurements from container outputs
+* OXI-16: Improve page loading speed with async image loading. Handle multiple images per QC type with user selector
+* OXI-17: Remove "Map Quality" from fNIRS QC edit and display
+
 
 ## fNIRS Plugin 1.2.0
 _Released Feb 2026_

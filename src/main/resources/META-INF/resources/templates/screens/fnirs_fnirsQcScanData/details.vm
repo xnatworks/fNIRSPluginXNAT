@@ -1,36 +1,38 @@
-<tr>
-	<th>Pass</th>
-	<td style="font-weight:bold;">
-		#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/pass").equals("1"))
-			<span style="color:green">Passed</span>
-		#elseif($!scan.getStringProperty("fnirs:fnirsQcScanData/pass").equals("0"))
-			<span style="color:red">Failed</span>
-		#else
-			<span style="color:gold">Unknown ($!scan.getStringProperty("fnirs:fnirsQcScanData/pass")</span>
-		#end
-	</td>
-</tr>
-<tr>
-    <th>Light Fall Off</th>
-    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/lightFalloff") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/lightFalloff") #end</td>
-</tr>
-<tr>
-    <th>Pulse SNR</th>
-    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/pulseSnr") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/pulseSnr") #end</td>
-</tr>
-<tr>
-    <th>Pulsatility</th>
-    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/pulsatility") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/pulsatility") #end</td>
-</tr>
-<tr>
-    <th>Motion</th>
-    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/motion") !="0") $!scan.getStringProperty("fnirs:fnirsQcScanData/motion") #end</td>
-</tr>
-<tr>
-    <th>Map Quality</th>
-    <td>#if ($!scan.getStringProperty("fnirs:fnirsQcScanData/mapQuality") != "0") $!scan.getStringProperty("fnirs:fnirsQcScanData/mapQuality")#end</td>
-</tr>
-<tr>
-    <th>Additional QC Comments</th>
-    <td>$!scan.getStringProperty("fnirs:fnirsQcScanData/comments")</td>
-</tr>
+#set($imageScan_ID = $item.getStringProperty("fnirs:fnirsqcData/scans/scan[$scan_counter]/imageScan_ID"))
+
+<table cellspacing="10" border="0">
+    <tr valign="top">
+        <td width="330">
+            <h4>Snapshots</h4>
+            <div class="snapshot-grid-container"></div>
+            <script>
+                XNAT.app.showFnirsQcImages('${imageSession_ID}','${scanId}');
+            </script>
+        </td>
+        <td width="330">
+            <h4>Measurements</h4>
+            #showQcMeasurement("fnirs:fnirsQcScanData/percentGM" "PercentGM" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/medSnrRsd" "med_SNR_Rsd" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/medGvtd" "med_GVTD" $scan)
+        </td>
+        <td width="330">
+            <h4>Quality Assessments</h4>
+            <div class="panel-element">
+                <label class="element-label" for="$name">Pass</label>
+                <div class="element-wrapper">
+                    #if ($!scan.getStringProperty("xnat:qcScanData/pass").equals("1"))
+                        Pass
+                    #else
+                        Fail
+                    #end
+                </div>
+                <div class="clear"></div>
+            </div>
+            #showQcMeasurement("fnirs:fnirsQcScanData/lightFalloff" "Light Fall Off" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/pulseSnr" "Pulse SNR" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/pulsatility" "Pulsatility" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/motion" "Motion" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/comments" "Scan Comments" $scan)
+        </td>
+    </tr>
+</table>

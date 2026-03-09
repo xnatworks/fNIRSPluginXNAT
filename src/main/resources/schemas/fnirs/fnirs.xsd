@@ -175,6 +175,9 @@
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:element>
+                    <xs:element name="percentGm" type="xs:float" />
+                    <xs:element name="medSnrRsd" type="xs:float" />
+                    <xs:element name="medGvtd" type="xs:float" />
                 </xs:sequence>
             </xs:extension>
         </xs:complexContent>
