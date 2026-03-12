@@ -1,11 +1,11 @@
 package org.nrg.xnat.turbine.modules.screens;
 
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.turbine.util.RunData;
 import org.apache.velocity.context.Context;
-import org.nrg.xdat.model.FnirsFnirsscandataI;
+import org.nrg.xdat.XDAT;
 import org.nrg.xdat.model.XnatImagescandataI;
 import org.nrg.xdat.model.XnatQcscandataI;
 import org.nrg.xdat.om.FnirsFnirsqcdata;
@@ -13,11 +13,7 @@ import org.nrg.xdat.om.FnirsFnirsqcscandata;
 import org.nrg.xdat.om.XnatExperimentdata;
 import org.nrg.xdat.om.XnatImagescandata;
 import org.nrg.xdat.om.XnatImagesessiondata;
-import org.nrg.xdat.om.XnatMrqcscandata;
-import org.nrg.xdat.om.XnatMrscandata;
 import org.nrg.xdat.om.XnatOtherqcscandata;
-import org.nrg.xdat.om.XnatPetqcscandata;
-import org.nrg.xdat.om.XnatPetscandata;
 import org.nrg.xdat.om.FnirsFnirsscandata;
 import org.nrg.xdat.om.XnatQcscandata;
 import org.nrg.xdat.turbine.utils.TurbineUtils;
@@ -28,12 +24,11 @@ import org.nrg.xft.security.UserI;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
 
+@SuppressWarnings("unused")
+@Slf4j
 public class XDATScreen_edit_fnirs_fnirsqcData extends EditImageAssessorScreen {
-    static Logger logger = Logger.getLogger(XDATScreen_edit_fnirs_fnirsqcData.class);
-
     public String getElementName() {
         return "fnirs:fnirsqcData";
     }
@@ -43,7 +38,7 @@ public class XDATScreen_edit_fnirs_fnirsqcData extends EditImageAssessorScreen {
      */
     @Override
     public ItemI getEmptyItem(RunData data) throws Exception {
-        final UserI user = TurbineUtils.getUser(data);
+        final UserI user = XDAT.getUserDetails();
         final FnirsFnirsqcdata qcAccessor = new FnirsFnirsqcdata(XFTItem.NewItem(getElementName(), user));
         final String searchElement = TurbineUtils.GetSearchElement(data);
         if (!StringUtils.isEmpty(searchElement)) {
@@ -92,7 +87,7 @@ public class XDATScreen_edit_fnirs_fnirsqcData extends EditImageAssessorScreen {
         if(TurbineUtils.HasPassedParameter("types", data)){
             //only show requested modalities
             types=Lists.newArrayList(Arrays.asList(TurbineUtils.GetPassedObjects("types", data)));
-        }else if(qcAccessor.getScans_scan().size()>0){
+        }else if(!qcAccessor.getScans_scan().isEmpty()){
             //show similar scans (by modality)
             for(final XnatQcscandataI scan: qcAccessor.getScans_scan()){
                 if(!types.contains(scan.getXSIType())){
@@ -104,7 +99,7 @@ public class XDATScreen_edit_fnirs_fnirsqcData extends EditImageAssessorScreen {
         List<XnatImagescandata> imageScans = imageSession.getScans_scan();
 //        imageScans.sort(Comparator.comparing(XnatImagescandata::getId));
         for (XnatImagescandataI imageScan: imageScans){
-            if(types.size()==0 || types.contains(imageScan.getXSIType())){
+            if(types.isEmpty() || types.contains(imageScan.getXSIType())){
                 XnatQcscandata scan = (XnatQcscandata)getQCScan(qcAccessor,imageScan.getId());
                 if(scan==null){
                     if (FnirsFnirsscandata.SCHEMA_ELEMENT_NAME.equals(imageScan.getXSIType())) {
@@ -140,7 +135,7 @@ public class XDATScreen_edit_fnirs_fnirsqcData extends EditImageAssessorScreen {
 
         if(qcAccessor.getImageSessionData()!=null){
             try {
-                populateDetails(qcAccessor,qcAccessor.getImageSessionData(),TurbineUtils.getUser(data),data);
+                populateDetails(qcAccessor, qcAccessor.getImageSessionData(), XDAT.getUserDetails(), data);
             } catch (Exception e) {
                 logger.error("",e);
             }

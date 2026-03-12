@@ -124,7 +124,7 @@
 		<DisplayFieldElement name="Field1" schema-element="fnirs:fnirsqcData/comments"/>
 	</DisplayField>
 	<DisplayField id="PASS" header="Pass/Fail" visible="true" searchable="false">
-		<DisplayFieldElement name="Field1" schema-element="fnirs:fnirsqcData/pass"/>
+		<DisplayFieldElement name="Field1" schema-element="fnirs:fnirsQcScanData/pass"/>
 		<Content type="sql">CASE @Field1 WHEN '1' THEN 'Pass' WHEN '0' THEN 'Fail' WHEN '2' THEN 'Good' WHEN '3' THEN 'Fair' WHEN '4' THEN 'Unusable' ELSE @Field1 END</Content>
 	</DisplayField>
 	<DisplayVersion versionName="listing" default-order-by="DATE" default-sort-order="DESC" brief-description="fNIRS QC" dark-color="9999CC" light-color="CCCCFF">
