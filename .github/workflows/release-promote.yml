@@ -13,10 +13,10 @@ on:
         type: string
         required: true
       target_main:
-        description: 'Branch to merge into (default master — xnatworks repos keep master as default branch)'
+        description: 'Branch to merge into (default main — xnatworks repos keep main as default branch)'
         type: string
         required: false
-        default: master
+        default: main
       trigger_build:
         description: 'After promote, dispatch build/publish on target_main'
         type: boolean
@@ -24,7 +24,7 @@ on:
         default: true
 
 permissions:
-  contents: write   # push RC/master + create tag
+  contents: write   # push RC/main + create tag
   actions:  write   # dispatch build-publish workflow
 
 jobs:

@@ -30,7 +30,7 @@ jobs:
 
       # ──── Artifact ────
       artifact-glob: 'build/libs/*-xpl.jar'
-      artifact-name: 'nrg_plugin_radiomics-jar'
+      artifact-name: 'fnirs-plugin-jar'
 
       # ──── GitHub Packages ────
       # On any push: publish. On dispatch: only when publish_packages ticked.
