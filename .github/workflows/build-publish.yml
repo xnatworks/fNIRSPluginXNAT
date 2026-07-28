@@ -1,0 +1,39 @@
+name: Build and Publish
+
+# Thin caller around the shared reusable workflow in
+# xnatworks/xnat-ci-workflows. Plugin variant — no GHCR Docker image.
+# Publishes maven artifacts to GitHub Packages; every branch push publishes
+# a unique version (<base>-<branch>-<timestamp>-<sha>).
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+    inputs:
+      publish_packages:
+        description: 'Publish artifacts to GitHub Packages'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write   # publish to GitHub Packages (and required by publish-ghcr job parsing)
+
+jobs:
+  build-publish:
+    uses: xnatworks/xnat-ci-workflows/.github/workflows/gradle-build-publish.yml@v1
+    with:
+      # ──── Gradle ────
+      # xnatPluginJar (the -xpl deployment jar) is not wired into `build`
+      gradle-build-task: 'build xnatPluginJar'
+
+      # ──── Artifact ────
+      artifact-glob: 'build/libs/*-xpl.jar'
+      artifact-name: 'nrg_plugin_radiomics-jar'
+
+      # ──── GitHub Packages ────
+      # On any push: publish. On dispatch: only when publish_packages ticked.
+      publish-packages: ${{ github.event_name == 'push' || inputs.publish_packages }}
+
+    secrets: inherit
