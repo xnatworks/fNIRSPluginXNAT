@@ -1,9 +1,9 @@
 name: Build and Publish
 
 # Thin caller around the shared reusable workflow in
-# xnatworks/xnat-ci-workflows. Plugin variant — no GHCR Docker image.
-# Publishes maven artifacts to GitHub Packages; every branch push publishes
-# a unique version (<base>-<branch>-<timestamp>-<sha>).
+# xnatworks/xnat-ci-workflows. Publishes maven artifacts to GitHub Packages
+# with the exact version from build.gradle; only long-lived branches
+# (master/main/develop/releases/*) publish, other branches just build.
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
 
 permissions:
   contents: read
-  packages: write   # publish to GitHub Packages (and required by publish-ghcr job parsing)
+  packages: write   # publish to GitHub Packages
 
 jobs:
   build-publish:
