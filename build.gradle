@@ -206,11 +206,14 @@ publishing {
             }
         }
     }
-    repositories{
+    repositories {
         maven {
-            url = "https://nrgxnat.jfrog.io/nrgxnat/libs-${project.version.endsWith("-SNAPSHOT") ? "snapshot" : "release"}"
-            // The value for name must match <id> in ~/.m2/settings.xml
-            name = "XNAT_Artifactory"
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/" + (System.getenv("GITHUB_REPOSITORY") ?: "xnatworks/fNIRSPluginXNAT"))
+            credentials {
+                username = project.findProperty("gprUser") ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gprToken") ?: System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }
