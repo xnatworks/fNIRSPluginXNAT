@@ -32,11 +32,11 @@ import org.springframework.context.annotation.ComponentScan;
                                    plural = "fNIRS QCs",
                                    code = "fQC")
             })
-@ComponentScan("org.nrg.xnatx.plugins.fnirs.preferences")
+@ComponentScan("org.nrg.xnatx.plugins.fnirs")
 @Slf4j
 public class FnirsPlugin {
     @Bean
-    public ImporterHandlerPackages pixiImporterHandlerPackages() {
+    public ImporterHandlerPackages fnirsPluginImporterHandlerPackages() {
         return new ImporterHandlerPackages("org.nrg.xnatx.plugins.fnirs.importer");
     }
 }
