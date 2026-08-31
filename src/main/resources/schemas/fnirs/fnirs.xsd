@@ -123,12 +123,6 @@
                             1 - 5
                         </xs:documentation>
                     </xs:annotation>
-                    <xs:simpleType>
-                        <xs:restriction base="xs:integer">
-                            <xs:minInclusive value="0"/>
-                            <xs:maxInclusive value="5"/>
-                        </xs:restriction>
-                    </xs:simpleType>
                     </xs:element>
                     <xs:element name="pulseSnr" type="xs:string" minOccurs="0">
                         <xs:annotation>
@@ -138,12 +132,6 @@
                                 1 - 5
                             </xs:documentation>
                         </xs:annotation>
-                        <xs:simpleType>
-                            <xs:restriction base="xs:integer">
-                                <xs:minInclusive value="0"/>
-                                <xs:maxInclusive value="5"/>
-                            </xs:restriction>
-                        </xs:simpleType>
                     </xs:element>
                     <xs:element name="pulsatility" type="xs:string" minOccurs="0">
                         <xs:annotation>
@@ -153,12 +141,6 @@
                                 1 - 5
                             </xs:documentation>
                         </xs:annotation>
-                        <xs:simpleType>
-                            <xs:restriction base="xs:integer">
-                                <xs:minInclusive value="0"/>
-                                <xs:maxInclusive value="5"/>
-                            </xs:restriction>
-                        </xs:simpleType>
                     </xs:element>
                     <xs:element name="mapQuality" type="xs:string" minOccurs="0">
                         <xs:annotation>
@@ -168,12 +150,6 @@
                                 1 - 5
                             </xs:documentation>
                         </xs:annotation>
-                        <xs:simpleType>
-                            <xs:restriction base="xs:integer">
-                                <xs:minInclusive value="0"/>
-                                <xs:maxInclusive value="5"/>
-                            </xs:restriction>
-                        </xs:simpleType>
                     </xs:element>
                     <xs:element name="percentGm" type="xs:float" />
                     <xs:element name="medSnrRsd" type="xs:float" />
