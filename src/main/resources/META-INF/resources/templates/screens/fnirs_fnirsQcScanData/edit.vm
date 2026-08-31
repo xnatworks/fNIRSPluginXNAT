@@ -26,6 +26,7 @@
             #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/lightFalloff" "Light Fall Off" $item $vr)
             #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pulseSnr" "Pulse SNR" $item $vr)
             #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pulsatility" "Pulsatility" $item $vr)
+            #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/mapQuality" "Map Quality" $item $vr)
             #qcEnumeratedRating("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/motion" "Motion" $item $vr)
             #qcYesNoSelect("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/pass" "Pass QC?" $item $vr)
             #xdatHiddenBox("fnirs:fnirsqcData/scans/scan[$scan_counter][@xsi:type=fnirs:fnirsQcScanData]/xnat_qcScanData_id" $item "")
