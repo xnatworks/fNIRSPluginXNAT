@@ -31,6 +31,7 @@
             #showQcMeasurement("fnirs:fnirsQcScanData/lightFalloff" "Light Fall Off" $scan)
             #showQcMeasurement("fnirs:fnirsQcScanData/pulseSnr" "Pulse SNR" $scan)
             #showQcMeasurement("fnirs:fnirsQcScanData/pulsatility" "Pulsatility" $scan)
+            #showQcMeasurement("fnirs:fnirsQcScanData/mapQuality" "Map Quality" $scan)
             #showQcMeasurement("fnirs:fnirsQcScanData/motion" "Motion" $scan)
             #showQcMeasurement("fnirs:fnirsQcScanData/comments" "Scan Comments" $scan)
         </td>

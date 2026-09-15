@@ -1,0 +1,50 @@
+siteSettings:
+  kind: tabs
+  meta:
+    tabGroups:
+      fnirsPlugin: fNIRS Plugin
+  contents:
+    fnirsConfig:
+      kind: tab
+      group: fnirsPlugin
+      label: fNIRS Settings
+      active: true
+      contents:
+        ${fnirsConfigPanel}
+
+fnirsConfigPanel:
+  kind: panel.form
+  name: fnirsConfigPanel
+  label: fNIRS Import Settings
+  method: POST
+  contentType: json
+  url: ~/xapi/fnirs/settings
+  contents:
+    useFnirsTemplatesAsRegex:
+      kind: panel.input.switchbox
+      name: useFnirsTemplatesAsRegex
+      label: "Use fNIRS templates as regular expressions?"
+      onText: Yes, use fNIRS templates as regular expressions
+      offText: No, use fNIRS templates as name prefixes
+      description: >
+        When enabled, the fNIRS templates will be treated as regular expressions instead of name prefixes. For 
+        example, if the value is "sub-\\d+", then folder names that match the regular expression "sub-\\d+" will
+        assign any contained sessions to a subject with that label.
+
+    fnirsSubjectId:
+      kind: panel.input.text
+      name: fnirsSubjectId
+      label: Subject ID
+      placeholder: sub-
+      description: >
+        Indicates the prefix of the folder names in fNIRS uploads that identify subject IDs. For example, if the value is 
+        "sub-", then folder names that start with "sub-" will assign any contained sessions to a subject with that label.
+
+    fnirsSessionId:
+      kind: panel.input.text
+      name: fnirsSessionId
+      label: Session ID
+      placeholder: ses-
+      description: >
+        Indicates the prefix of the folder names in fNIRS uploads that identify session IDs. For example, if the value is 
+        "ses-", then folder names that start with "ses-" will assign any contained data to a session with that label.

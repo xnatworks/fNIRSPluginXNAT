@@ -3,6 +3,7 @@
  * Created on Fri May 03 13:23:23 CDT 2024
  *
  */
+
 package org.nrg.xnat.turbine.modules.screens;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,26 +27,28 @@ import java.util.List;
  */
 
 @Slf4j
-
 public class XDATScreen_report_fnirs_fnirsPipelineAssessorData extends SecureReport {
-	public void finalProcessing(RunData data, Context context) {
-		FnirsFnirspipelineassessordata om = (FnirsFnirspipelineassessordata) context.get("om");
-		List<XnatAbstractresourceI> files = om.getOut_file();
+    public void finalProcessing(RunData data, Context context) {
+        FnirsFnirspipelineassessordata om    = (FnirsFnirspipelineassessordata) context.get("om");
+        List<XnatAbstractresourceI>    files = om.getOut_file();
 
-		if (files==null){
-			return;
-		}
+        if (files == null) {
+            return;
+        }
 
-
-		XnatResourcecatalog resource = (XnatResourcecatalog) files.get(0);
-		context.put("showFnirFigs", resource!=null);
-		context.put("assessorId", ((FnirsFnirspipelineassessordata) om).getId());
-		context.put("exptId", ((FnirsFnirspipelineassessordata) om).getImagesessionId());
-		try {
-			context.put("html", FileUtils.readFileToString(new File(Paths.get(resource.getUri()).getParent().resolve("output.html").toString()), Charset.defaultCharset()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		context.put("htmlFilePath", Paths.get(resource.getUri()).getParent().resolve("output.html").toString());
-
-	}}
+        XnatResourcecatalog resource = (XnatResourcecatalog) files.getFirst();
+        context.put("showFnirFigs", resource != null);
+        context.put("assessorId", om.getId());
+        context.put("exptId", om.getImagesessionId());
+        if (resource != null) {
+            try {
+                context.put("html", FileUtils.readFileToString(new File(Paths.get(resource.getUri()).getParent().resolve("output.html").toString()), Charset.defaultCharset()));
+            } catch (IOException e) {
+                log.error("Unable to read HTML file for fNIRS pipeline assessor {}: {}", om.getId(), e.getMessage());
+            }
+            context.put("htmlFilePath", Paths.get(resource.getUri()).getParent().resolve("output.html").toString());
+        } else {
+            log.warn("No resource found for fNIRS pipeline assessor {}. Cannot display HTML output.", om.getId());
+        }
+    }
+}
