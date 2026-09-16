@@ -2,23 +2,38 @@
 <div>
     <h2>fNIRS Scan Imaging Uploader</h2>
 
-    <p>Upload zipped (.zip) set of subjects and their sessions to a specified project.</p>
-
     <form id="upload-form" name="upload-form" method="post">
 
         <label for="project" class="project-label">$displayManager.getSingularDisplayNameForProject()</label>
 
         <section class="project-inputs">
-            <select id="project" name="project" form="upload-form"  required>
+            <select id="project" name="project" form="upload-form" required>
                 <option value="" disabled selected>Select Project</option>
                 <option value="testFNIRS Project">testFNIRS Project</option>
             </select>
         </section>
 
-        <label class="file-label" for="file">File</label>
+        <label for="upload-type" class="upload-type-label">Upload Type</label>
 
-        <section class="file-inputs">
+        <section class="upload-type-section">
+            <select id="upload-type" upload-type="type" form="upload-form" required>
+                <option value="zip" selected>Zip File</option>
+                <option value="folder">Uncompressed Folder</option>
+            </select>
+        </section>
+
+        <p id="file-note">Upload zipped (.zip) set of subjects and their sessions to a specified project.</p>
+        <p id="folder-note" style="display:none">Select a folder from your local filesystem to upload all of its contents to a specific project</p>
+
+        <label class="file-label" for="file">File</label>
+        <label class="folder-label" for="folder" style="display:none">Folder</label>
+
+        <section class="file-inputs" id="file-section">
             <input type="file" id="file" name="file" accept="application/zip" required/>
+        </section>
+
+        <section class="folder-inputs" id="folder-section" style="display:none">
+            <input type="file" id="folder" name="folder" webkitdirectory required/>
         </section>
 
         <input class="submit" id="uploadButton" type="button" name="eventSubmit_doPerform" value="Begin Upload" onclick="submitForm();"/>
@@ -29,22 +44,30 @@
     .project-label { grid-area: project-label; }
     .project-inputs { grid-area: project-inputs; }
 
+    #file-note, #folder-note{ grid-area: file-note; }
+
     .file-label { grid-area: file-label; }
     .file-inputs { grid-area: file-inputs; }
 
+    .upload-type-label { grid-area: upload-type-label; }
+    .upload-type-section { grid-area: upload-type-inputs; }
+    .folder-inputs { grid-area: file-inputs; }
+
     .submit { grid-area: submit; }
 
-    .project-label, .file-label {
+    .project-label, .file-label, .folder-label, .upload-type-label {
         font-weight: bold;
     }
 
     #upload-form {
-        width: 400px;
+        width: 600px;
         display: grid;
-        grid-template-columns: 100px 120px 180px;
+        grid-template-columns: 100px 120px 380px;
         row-gap: 1em;
         grid-template-areas:
             'project-label project-inputs project-inputs'
+            'upload-type-label upload-type-inputs upload-type-inputs'
+            'file-note file-note file-note'
             'file-label file-inputs file-inputs'
             '. submit .'
     }
@@ -59,12 +82,43 @@
     let projectEl         = document.getElementById("project");
     let prearchiveCode0El = document.getElementById("prearchive-code-0");
     let prearchiveCode1El = document.getElementById("prearchive-code-1");
+    let uploadTypeEl      = document.getElementById("upload-type");
     let fileEl            = document.getElementById("file");
+    let folderEl          = document.getElementById('folder');
 
     // Load projects then render project select box
 
-    let getallProjects = async function() {
-        console.debug(`getallProjects`);
+    let getAllProjects = async function() {
+        console.debug(`getAllProjects`);
+
+        document.getElementById('upload-type').addEventListener('change', function() {
+            let fileLabelEl = document.querySelector('.file-label');
+            let folderLabelEl = document.querySelector('.folder-label');
+            let fileNoteEl = document.getElementById('file-note');
+            let folderNoteEl = document.getElementById('folder-note');
+            let fileSection = document.getElementById('file-section');
+            let folderSection = document.getElementById('folder-section');
+
+            if (this.value === 'zip') {
+                fileLabelEl.style.display = 'block';
+                folderLabelEl.style.display = 'none';
+                fileNoteEl.style.display = 'block';
+                folderNoteEl.style.display = 'none';
+                fileSection.style.display = 'block';
+                folderSection.style.display = 'none';
+                fileEl.required = true;
+                folderEl.required = false;
+            } else {
+                fileLabelEl.style.display = 'none';
+                folderLabelEl.style.display = 'block';
+                fileNoteEl.style.display = 'none';
+                folderNoteEl.style.display = 'block';
+                fileSection.style.display = 'none';
+                folderSection.style.display = 'block';
+                fileEl.required = false;
+                folderEl.required = true;
+            }
+        });
 
         let projectUrl = XNAT.url.restUrl('/data/projects');
         projectUrl = XNAT.url.addQueryString(projectUrl, ['prearc_code=true',
@@ -97,17 +151,16 @@
         })
     }
 
-    getallProjects().then(resultSet => resultSet['ResultSet']["Result"]).then(projectsList => renderProjectSelectBox(projectEl, projectsList))
-
-
-
+    getAllProjects().then(resultSet => resultSet['ResultSet']["Result"]).then(projectsList => renderProjectSelectBox(projectEl, projectsList))
 
     async function submitForm() {
         console.debug('submitForm()')
 
         function validateForm() {
             let validProject = XNAT.validate(projectEl).required().check();
-            let validImageArchiveFile = XNAT.validate(fileEl).is('fileType', 'zip').check()
+            let validImageArchiveFile = uploadTypeEl.value === 'zip'
+                ? XNAT.validate(fileEl).is('fileType', 'zip').check()
+                : folderEl.files.length > 0;
 
             return validProject && validImageArchiveFile;
         }
@@ -121,10 +174,7 @@
         }
 
         let projectId = projectEl.value;
-        let uploadId = new Date().toISOString()
-                                 .replaceAll('-', '_')
-                                 .replaceAll(':', '_')
-                                 .replaceAll('.', '_');
+        let uploadId = new Date().toISOString().replaceAll('-', '_').replaceAll(':', '_').replaceAll('.', '_');
 
         let file = fileEl.files[0];
         let encodedFileName = encodeURIComponent(file.name);
