@@ -138,16 +138,15 @@ public class FNIRSImporter extends ImporterHandlerA {
                         while (zipEntry != null && zipEntry.getName().contains(session) && zipEntry.getName().contains(subject)) {
                             if (zipEntry.isDirectory() && zipEntry.getName().contains(NIRS) && !zipEntry.getName().contains(MACOSX)) {
                                 //It is a nirs folder so get subject, session, and scan name details from path
-                                log.info("nirs directory create scan and push files for dir {}", zipEntry.getName());
+                                log.info("fnirs directory create scan and push files for dir {}", zipEntry.getName());
                                 paths = splitPath(zipEntry.getName());
                                 String scanName = paths[paths.length - 2];
                                 session = paths[paths.length - 3];
                                 subject = paths[paths.length - 4];
                                 //Create subject session and prearchive folder to transfer data too
                                 XnatSubjectdata lookForSubject = XnatSubjectdata.GetSubjectByProjectIdentifier(projectId, subject, user, false);
-                                String          subjectID      = null;
                                 if (lookForSubject != null) {
-                                    subjectID = createSubject(projectId, subject);
+                                    createSubject(projectId, subject);
                                 }
                                 Path prearchiveFolderPath = createPreArchiveFolder(projectId, subject, session, scanName, timestamp, Boolean.FALSE);
                                 createSession(projectId, subject, session, scanName, timestamp, prearchiveFolderPath);
@@ -170,9 +169,8 @@ public class FNIRSImporter extends ImporterHandlerA {
                                 subject = paths[paths.length - 4];
                                 //Create subject session and prearchive folder to transfer data too
                                 XnatSubjectdata lookForSubject = XnatSubjectdata.GetSubjectByProjectIdentifier(projectId, subject, user, false);
-                                String          subjectID      = null;
                                 if (lookForSubject != null) {
-                                    subjectID = createSubject(projectId, subject);
+                                    createSubject(projectId, subject);
                                 }
                                 Path prearchiveFolderPath = createPreArchiveFolder(projectId, subject, session, scanName, timestamp, Boolean.TRUE);
                                 createSession(projectId, subject, session, scanName, timestamp, prearchiveFolderPath);
@@ -220,14 +218,13 @@ public class FNIRSImporter extends ImporterHandlerA {
         new ZipEntryFileWriterWrapper(zipEntry, zis).write(finalPathForPrearchive.toFile());
     }
 
-
-    private String createSubject(String projectId, String subjectLabel) {
+    private void createSubject(String projectId, String subjectLabel) {
         final String subjectId;
         try {
             subjectId = XnatSubjectdata.CreateNewID();
         } catch (Exception e) {
             log.error("Unable to create new subject ID for subject {} in project {}", subjectLabel, projectId, e);
-            return "ERROR";
+            return;
         }
 
         log.info("Creating subject in project {} with ID {}", projectId, subjectId);
@@ -246,7 +243,7 @@ public class FNIRSImporter extends ImporterHandlerA {
             eventMeta = workflow.buildEvent();
         } catch (Exception e) {
             log.error("Unable to create workflow entry for creating subject {} for project {}", subjectLabel, projectId, e);
-            return "ERROR";
+            return;
         }
         try {
             SaveItemHelper.authorizedSave(subject, user, false, false, eventMeta);
@@ -262,7 +259,6 @@ public class FNIRSImporter extends ImporterHandlerA {
             }
             log.error("Unable to create subject {} for project {}", subjectLabel, projectId, e);
         }
-        return subjectId;
     }
 
     private Path createPreArchiveFolder(String projectId, String subject, String sessionLabel, String scanLabel, String timestamp, Boolean addFolder) throws IOException {
@@ -299,11 +295,11 @@ public class FNIRSImporter extends ImporterHandlerA {
         session.setAutoArchive(shouldAutoArchive(projectId));
 
         Optional<SessionData> matchingSession = sessions.stream().filter(s -> s.getProject().equals(session.getProject()) &&
-                                                                              s.getFolderName().equals(session.getFolderName()) &&
-                                                                              s.getName().equals(session.getName()) &&
-                                                                              s.getSubject().equals(session.getSubject()) &&
-                                                                              (!s.getName().equalsIgnoreCase(UNKNOWN_SESSION_LABEL) ||
-                                                                               !session.getName().equalsIgnoreCase(UNKNOWN_SESSION_LABEL))).findAny();
+                                              s.getFolderName().equals(session.getFolderName()) &&
+                                              s.getName().equals(session.getName()) &&
+                                              s.getSubject().equals(session.getSubject()) &&
+                                              (!s.getName().equalsIgnoreCase(UNKNOWN_SESSION_LABEL) ||
+                                               !session.getName().equalsIgnoreCase(UNKNOWN_SESSION_LABEL))).findAny();
 
         Path sessionFolder = Paths.get(prearchiveTimestampPath.toString(), sessionFolderName);
 

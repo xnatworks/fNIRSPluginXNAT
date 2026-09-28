@@ -7,9 +7,8 @@
         <label for="project" class="project-label">$displayManager.getSingularDisplayNameForProject()</label>
 
         <section class="project-inputs">
-            <select id="project" name="project" form="upload-form" required>
-                <option value="" disabled selected>Select Project</option>
-                <option value="testFNIRS Project">testFNIRS Project</option>
+            <select id="project" name="project" form="upload-form" required disabled>
+                <option value="" disabled selected>Loading projects...</option>
             </select>
         </section>
 
@@ -36,7 +35,7 @@
             <input type="file" id="folder" name="folder" webkitdirectory required/>
         </section>
 
-        <input class="submit" id="uploadButton" type="button" name="eventSubmit_doPerform" value="Begin Upload" onclick="submitForm();"/>
+        <input class="submit" id="uploadButton" type="button" name="eventSubmit_doPerform" value="Begin Upload" onclick="XNAT.plugin.fnirs.fnirsImporter.submitForm();"/>
     </form>
 </div>
 
@@ -74,200 +73,6 @@
 </style>
 
 ##<script type="text/javascript" src="$content.getURI('scripts/xnat/plugin/fnirs/fnirs-projects.js')"></script>
-
-<script type="text/javascript">
-
-    // Form Elements
-    let formEl            = document.getElementById("upload-form");
-    let projectEl         = document.getElementById("project");
-    let prearchiveCode0El = document.getElementById("prearchive-code-0");
-    let prearchiveCode1El = document.getElementById("prearchive-code-1");
-    let uploadTypeEl      = document.getElementById("upload-type");
-    let fileEl            = document.getElementById("file");
-    let folderEl          = document.getElementById('folder');
-
-    // Load projects then render project select box
-
-    let getAllProjects = async function() {
-        console.debug(`getAllProjects`);
-
-        document.getElementById('upload-type').addEventListener('change', function() {
-            let fileLabelEl = document.querySelector('.file-label');
-            let folderLabelEl = document.querySelector('.folder-label');
-            let fileNoteEl = document.getElementById('file-note');
-            let folderNoteEl = document.getElementById('folder-note');
-            let fileSection = document.getElementById('file-section');
-            let folderSection = document.getElementById('folder-section');
-
-            if (this.value === 'zip') {
-                fileLabelEl.style.display = 'block';
-                folderLabelEl.style.display = 'none';
-                fileNoteEl.style.display = 'block';
-                folderNoteEl.style.display = 'none';
-                fileSection.style.display = 'block';
-                folderSection.style.display = 'none';
-                fileEl.required = true;
-                folderEl.required = false;
-            } else {
-                fileLabelEl.style.display = 'none';
-                folderLabelEl.style.display = 'block';
-                fileNoteEl.style.display = 'none';
-                folderNoteEl.style.display = 'block';
-                fileSection.style.display = 'none';
-                folderSection.style.display = 'block';
-                fileEl.required = false;
-                folderEl.required = true;
-            }
-        });
-
-        let projectUrl = XNAT.url.restUrl('/data/projects');
-        projectUrl = XNAT.url.addQueryString(projectUrl, ['prearc_code=true',
-            'recent=true',
-            'owner=true',
-            'member=true',
-            'collaborator=true']);
-
-        const response = await fetch(projectUrl, {
-            method: 'GET',
-            headers: {'Content-Type': 'application/json'}
-        })
-
-        return response.json()
-    }
-
-    let renderProjectSelectBox = function(selectBox, projects) {
-        console.debug('renderProjectSelectBox()')
-
-        // Clear select box
-        selectBox.options.length = 0;
-
-        // Placeholder
-        selectBox.options[0] = new Option("Select " + XNAT.app.displayNames.singular.project, "");
-        selectBox.options[0].disabled = true;
-        selectBox.options[0].selected = true;
-
-        projects.forEach(project => {
-            selectBox.options[selectBox.length] = new Option(project['id'], project['id'])
-        })
-    }
-
-    getAllProjects().then(resultSet => resultSet['ResultSet']["Result"]).then(projectsList => renderProjectSelectBox(projectEl, projectsList))
-
-    async function submitForm() {
-        console.debug('submitForm()')
-
-        function validateForm() {
-            let validProject = XNAT.validate(projectEl).required().check();
-            let validImageArchiveFile = uploadTypeEl.value === 'zip'
-                ? XNAT.validate(fileEl).is('fileType', 'zip').check()
-                : folderEl.files.length > 0;
-
-            return validProject && validImageArchiveFile;
-        }
-
-        let isValid = validateForm()
-
-        console.debug(`BLI uploader form validation: ${isValid}`);
-
-        if (!isValid) {
-            return;
-        }
-
-        let projectId = projectEl.value;
-        let uploadId = new Date().toISOString().replaceAll('-', '_').replaceAll(':', '_').replaceAll('.', '_');
-
-        let file = fileEl.files[0];
-        let encodedFileName = encodeURIComponent(file.name);
-        let cachePath = `/user/cache/resources/${uploadId}/files/${encodedFileName}`;
-        let encodedCachePath = encodeURIComponent(cachePath);
-        let userResourceCacheUrl = XNAT.url.csrfUrl(`/data/${cachePath}`);
-
-        let formDataFileOnly = new FormData()
-        formDataFileOnly.append('file', file)
-
-        // Upload the zip file to the users cache
-        console.debug(`Uploading ${file.name}`);
-        XNAT.ui.dialog.static.wait(`Uploading ${file.name}`,{id: "fnirs_upload"});
-
-        let response = await fetch(userResourceCacheUrl, {
-            method: 'PUT',
-            body : formDataFileOnly
-        })
-
-        if (response.ok) {
-            console.debug('Upload successful');
-            XNAT.ui.dialog.close("fnirs_upload");
-        } else {
-            console.error(`Failed to upload ${file.name}`)
-            XNAT.ui.dialog.close("fnirs_upload");
-            XNAT.ui.dialog.open({
-                title: 'Upload Failed',
-                content: `<div class="error">Failed to upload ${file.name}.</div>`,
-                buttons: [
-                    {
-                        label: 'OK',
-                        isDefault: true,
-                        close: true,
-                    }
-                ]
-            })
-            return;
-        }
-
-        let importServiceUrl = XNAT.url.csrfUrl('/data/services/import');
-        importServiceUrl = XNAT.url.addQueryString(importServiceUrl, ['import-handler=fNIRS',
-                                                                      `PROJECT_ID=${projectId}`,
-                                                                      `src=${encodedCachePath}`]);
-
-        // Extract the zip file from the users cache
-        console.debug(`Extracting ${file.name}`);
-        XNAT.ui.dialog.static.wait(`Extracting ${file.name}`,{id: "fnirs_extraction"});
-
-        response = await fetch(importServiceUrl, {method: 'POST'})
-
-        if (response.ok) {
-            console.debug('Extraction successful');
-            XNAT.ui.dialog.close("fnirs_extraction");
-
-            XNAT.ui.dialog.open({
-                title: 'Upload/Extraction Successful',
-                content: `<div class="success">Upload/Extraction of ${file.name} successful. Visit the <a target="_blank" href="$content.getURI("/app/template/XDATScreen_prearchives.vm")">prearchive</a> to review.</div>`,
-                buttons: [
-                    {
-                        label: 'OK',
-                        isDefault: true,
-                        close: true,
-                    }
-                ]
-            })
-        } else {
-            console.error(`Failed to extract ${file.name}`)
-            XNAT.ui.dialog.close("fnirs_extraction");
-
-            response.text().then(text => {
-                // Error message is returned as html. Try to extract from the h3 tags.
-                let error = text.match(/<h3>(.*)<\/h3>/);
-
-                if (error.length === 2) {
-                    return `Failed to extract ${file.name}: <br> <b>${error[1]}</b>`;
-                } else {
-                    return `Failed to extract ${file.name}`;
-                }
-            }).then(error => {
-                XNAT.ui.dialog.open({
-                    title: 'Extraction Failed',
-                    content: `<div class="error">${error}</div>`,
-                    buttons: [
-                        {
-                            label: 'OK',
-                            isDefault: true,
-                            close: true,
-                        }
-                    ]
-                })
-            })
-        }
-    }
-</script>
+<script type="text/javascript" src="$content.getURI('scripts/xnat/plugin/fnirs/fNIRSUploader.js')"></script>
 
 <!-- END fnirs-plugin templates/screens/UploadfNIRS.vm -->
