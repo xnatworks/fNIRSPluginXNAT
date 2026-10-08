@@ -1,4 +1,4 @@
-package org.nrg.xnatx.plugins.fnirs.preferences;
+package org.nrg.xnatx.plugins.fnirs.xapi;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +12,7 @@ import org.nrg.xapi.rest.AbstractXapiRestController;
 import org.nrg.xapi.rest.XapiRequestMapping;
 import org.nrg.xdat.security.services.RoleHolder;
 import org.nrg.xdat.security.services.UserManagementServiceI;
+import org.nrg.xnatx.plugins.fnirs.preferences.FnirsPreferences;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +28,7 @@ import static org.nrg.xdat.security.helpers.AccessLevel.DataAdmin;
 @Api("XNAT fNIRS Preferences API")
 @XapiRestController
 @Slf4j
-@RequestMapping("/fnirs")
+@RequestMapping("/fnirs/settings")
 public class FnirsPrefsApi extends AbstractXapiRestController {
     private final FnirsPreferences preferences;
 
@@ -42,7 +43,7 @@ public class FnirsPrefsApi extends AbstractXapiRestController {
                    @ApiResponse(code = 401, message = "Must be authenticated to access the XNAT REST API."),
                    @ApiResponse(code = 403, message = "Insufficient privileges to retrieve the requested setting."),
                    @ApiResponse(code = 500, message = "An unexpected error occurred.")})
-    @XapiRequestMapping(value = "settings", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET, restrictTo = DataAccess)
+    @XapiRequestMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET, restrictTo = DataAccess)
     public Map<String, Object> getFnirsPreferences() {
         log.info("User {} requested the system fNIRS settings.", getSessionUser().getUsername());
         return new HashMap<>(preferences);
@@ -53,7 +54,7 @@ public class FnirsPrefsApi extends AbstractXapiRestController {
                    @ApiResponse(code = 401, message = "Must be authenticated to access the XNAT REST API."),
                    @ApiResponse(code = 403, message = "Not authorized to set automation properties."),
                    @ApiResponse(code = 500, message = "An unexpected error occurred.")})
-    @XapiRequestMapping(value = "settings", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE}, method = RequestMethod.POST, restrictTo = DataAdmin)
+    @XapiRequestMapping(value = "", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE, MediaType.APPLICATION_JSON_VALUE}, method = RequestMethod.POST, restrictTo = DataAdmin)
     public void setDqrPreferences(@ApiParam(value = "The map of DQR preferences to be set.", required = true) @RequestBody final Map<String, String> properties) {
         log.info("User {} requested to set a batch of DQR preferences.", getSessionUser().getUsername());
         // Is this call initializing the system?
